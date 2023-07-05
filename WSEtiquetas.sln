@@ -25,10 +25,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "web", "web\", "{9DCF3CF1-E2
 		DefaultWebSiteLanguage = "Visual C#"
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cliente", "Cliente\Cliente.csproj", "{B49A089F-DE1C-440D-8C82-59392F60F515}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9DCF3CF1-E2B6-452D-83F1-E4B64B9B4015} = {9DCF3CF1-E2B6-452D-83F1-E4B64B9B4015}
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClienteWS", "ClienteWS\ClienteWS.csproj", "{2E90AA9C-07F4-41A9-A68E-210904DDEA4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,10 +37,10 @@ Global
 		{9DCF3CF1-E2B6-452D-83F1-E4B64B9B4015}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DCF3CF1-E2B6-452D-83F1-E4B64B9B4015}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{9DCF3CF1-E2B6-452D-83F1-E4B64B9B4015}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{B49A089F-DE1C-440D-8C82-59392F60F515}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B49A089F-DE1C-440D-8C82-59392F60F515}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B49A089F-DE1C-440D-8C82-59392F60F515}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B49A089F-DE1C-440D-8C82-59392F60F515}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E90AA9C-07F4-41A9-A68E-210904DDEA4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E90AA9C-07F4-41A9-A68E-210904DDEA4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E90AA9C-07F4-41A9-A68E-210904DDEA4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E90AA9C-07F4-41A9-A68E-210904DDEA4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
