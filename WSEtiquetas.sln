@@ -26,6 +26,9 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "web", "web\", "{9DCF3CF1-E2
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClienteWS", "ClienteWS\ClienteWS.csproj", "{2E90AA9C-07F4-41A9-A68E-210904DDEA4E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9DCF3CF1-E2B6-452D-83F1-E4B64B9B4015} = {9DCF3CF1-E2B6-452D-83F1-E4B64B9B4015}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
