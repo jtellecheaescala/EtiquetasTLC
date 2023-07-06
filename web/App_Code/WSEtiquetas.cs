@@ -27,8 +27,12 @@ public class WSEtiquetas : WebService
 
     private const string PAGE_SIZE_A4 = "A4";
     private const string PAGE_SIZE_ZEBRA = "ZEBRA";
+    private PageSize SIZE_ZEBRA = new PageSize(285, 285);
     private const string TEMPLATE_VERTICAL = "BULTOSVERTICAL";
     private const string TEMPLATE_BULTOSXD = "BULTOSXD";
+    private const string TEMPLATE_BULTOS_DHL_APPLE = "BULTOS_DHL_APPLE";
+    private const string TEMPLATE_VIAJES_DHL_Apple = "VIAJES_DHL_APPLE";
+    private List<String> TemplatesHabilitados = new List<string>() { TEMPLATE_VERTICAL, TEMPLATE_BULTOSXD, TEMPLATE_BULTOS_DHL_APPLE, TEMPLATE_VIAJES_DHL_Apple };
 
     private string MODO_OBTENCION_ARCHIVO;
 
@@ -46,7 +50,7 @@ public class WSEtiquetas : WebService
     internal static int timeOutQueries = 30;    //default 30 seg
 
     [WebMethod]
-    public Response EtiquetasWS(string user, string password, string IDRemito, string cliente, string format, string size, int separarPorDocumento, string template)
+    public Response EtiquetasWS(string user, string password, string IDRemito, string cliente, string format, string size, int separarPorDocumento, string template, string nroOperacion, string nroViaje)
     {
         Response response = new Response();
         if (connDB.State == ConnectionState.Closed) connDB.Open();
@@ -103,7 +107,7 @@ public class WSEtiquetas : WebService
             }
 
             //Validaciones para el template BultosXD
-            if(template.ToUpper() == TEMPLATE_BULTOSXD)
+            if(template.ToUpper() == TEMPLATE_BULTOSXD || template.ToUpper() == TEMPLATE_BULTOS_DHL_APPLE || template.ToUpper() == TEMPLATE_VIAJES_DHL_Apple)
             {
                 #region Generacion de mensaje de error
                 string msgError = null;
@@ -399,6 +403,162 @@ public class WSEtiquetas : WebService
                         }
                     }
                 }
+                else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
+                {
+                    using (SqlDataReader readerCantidad = new SqlCommand
+                    {
+                        Connection = connDB,
+                        CommandType = CommandType.Text,
+                        CommandTimeout = timeOutQueries,
+                        CommandText = queriesSQL.cant_BultosXD,
+                        Parameters =
+                        {
+                            new SqlParameter { ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
+                        }
+                    }.ExecuteReader())
+                    {
+                        if (readerCantidad.HasRows)
+                        {
+                            while (readerCantidad.Read())
+                            {
+                                cantidadTotal = LimpiarCampo(readerCantidad["Cantidad"]);
+                            }
+                        }
+                        else
+                        {
+                            log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                            if (connDB.State == ConnectionState.Open) connDB.Close();
+                            if (connLog.State == ConnectionState.Open) connLog.Close();
+                            response.message = "ERROR: Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                            return response;
+                        }
+                    }
+
+                    using (SqlDataReader readerData = new SqlCommand
+                    {
+                        Connection = connDB,
+                        CommandType = CommandType.Text,
+                        CommandTimeout = timeOutQueries,
+                        CommandText = queriesSQL.sRemitosBultosXD,
+                        Parameters =
+                        {
+                            new SqlParameter {ParameterName = "@CodCliente", SqlDbType = SqlDbType.Int, Value = int.Parse(cliente)},
+                            new SqlParameter {ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
+                        }
+                    }.ExecuteReader())
+                    {
+                        if (readerData.HasRows)
+                        {
+                            while (readerData.Read())
+                            {
+                                etiquetasCount++;
+
+                                BultosXD nBultoXD = new BultosXD();
+
+                                nBultoXD.Origen = LimpiarCampo(readerData["Origen"]);
+                                nBultoXD.Domicilio = LimpiarCampo(readerData["Domicilio"]);
+                                nBultoXD.Localidad = LimpiarCampo(readerData["Localidad"]);
+                                nBultoXD.Mail = LimpiarCampo(readerData["Mail"]);
+                                nBultoXD.Url = LimpiarCampo(readerData["Url"]);
+                                nBultoXD.Nro_seguimiento = LimpiarCampo(readerData["Nro_seguimiento"]);
+                                nBultoXD.Fecha = LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
+                                nBultoXD.Destino_cod = LimpiarCampo(readerData["Destino_cod"]);
+                                nBultoXD.Bultos = LimpiarCampo(readerData["Bultos"]);
+                                nBultoXD.Destino_razon_soc = LimpiarCampo(readerData["Destino_razon_soc"]);
+                                nBultoXD.Tipo_servicio = LimpiarCampo(readerData["Tipo_servicio"]);
+                                nBultoXD.Cantidad_etiquetas = Convert.ToInt32(cantidadTotal);
+
+                                remitos.Add(new Remito(int.Parse(sIDRemito), nBultoXD));
+                            }
+                        }
+                        else
+                        {
+                            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                            if (connDB.State == ConnectionState.Open) connDB.Close();
+                            if (connLog.State == ConnectionState.Open) connLog.Close();
+                            response.message = "Notificacion: No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                            return response;
+                        }
+                    }
+                }
+                else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
+                {
+                    using (SqlDataReader readerCantidad = new SqlCommand
+                    {
+                        Connection = connDB,
+                        CommandType = CommandType.Text,
+                        CommandTimeout = timeOutQueries,
+                        CommandText = queriesSQL.cant_BultosXD,
+                        Parameters =
+                        {
+                            new SqlParameter { ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
+                        }
+                    }.ExecuteReader())
+                    {
+                        if (readerCantidad.HasRows)
+                        {
+                            while (readerCantidad.Read())
+                            {
+                                cantidadTotal = LimpiarCampo(readerCantidad["Cantidad"]);
+                            }
+                        }
+                        else
+                        {
+                            log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                            if (connDB.State == ConnectionState.Open) connDB.Close();
+                            if (connLog.State == ConnectionState.Open) connLog.Close();
+                            response.message = "ERROR: Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                            return response;
+                        }
+                    }
+
+                    using (SqlDataReader readerData = new SqlCommand
+                    {
+                        Connection = connDB,
+                        CommandType = CommandType.Text,
+                        CommandTimeout = timeOutQueries,
+                        CommandText = queriesSQL.sRemitosBultosXD,
+                        Parameters =
+                        {
+                            new SqlParameter {ParameterName = "@CodCliente", SqlDbType = SqlDbType.Int, Value = int.Parse(cliente)},
+                            new SqlParameter {ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
+                        }
+                    }.ExecuteReader())
+                    {
+                        if (readerData.HasRows)
+                        {
+                            while (readerData.Read())
+                            {
+                                etiquetasCount++;
+
+                                BultosXD nBultoXD = new BultosXD();
+
+                                nBultoXD.Origen = LimpiarCampo(readerData["Origen"]);
+                                nBultoXD.Domicilio = LimpiarCampo(readerData["Domicilio"]);
+                                nBultoXD.Localidad = LimpiarCampo(readerData["Localidad"]);
+                                nBultoXD.Mail = LimpiarCampo(readerData["Mail"]);
+                                nBultoXD.Url = LimpiarCampo(readerData["Url"]);
+                                nBultoXD.Nro_seguimiento = LimpiarCampo(readerData["Nro_seguimiento"]);
+                                nBultoXD.Fecha = LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
+                                nBultoXD.Destino_cod = LimpiarCampo(readerData["Destino_cod"]);
+                                nBultoXD.Bultos = LimpiarCampo(readerData["Bultos"]);
+                                nBultoXD.Destino_razon_soc = LimpiarCampo(readerData["Destino_razon_soc"]);
+                                nBultoXD.Tipo_servicio = LimpiarCampo(readerData["Tipo_servicio"]);
+                                nBultoXD.Cantidad_etiquetas = Convert.ToInt32(cantidadTotal);
+
+                                remitos.Add(new Remito(int.Parse(sIDRemito), nBultoXD));
+                            }
+                        }
+                        else
+                        {
+                            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                            if (connDB.State == ConnectionState.Open) connDB.Close();
+                            if (connLog.State == ConnectionState.Open) connLog.Close();
+                            response.message = "Notificacion: No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                            return response;
+                        }
+                    }
+                }
                 else
                 {
                     vertical = false;
@@ -490,13 +650,25 @@ public class WSEtiquetas : WebService
                     response.message = "Etiquetas generadas con exito";
                     response.Archivos.Add(archivo);
                 }
+                else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
+                {
+                    var archivo = new HandlersEtiquetasApple(log, connLog, severidades, MODO_OBTENCION_ARCHIVO, gvalues, size).GenerarPDFBultosDHLApple(remitos, size.ToLower(), format);
+                    response.message = "Etiquetas generadas con exito";
+                    response.Archivos.Add(archivo);
+                }
+                else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
+                { 
+                    var archivo = new HandlersEtiquetasApple(log,connLog,severidades,MODO_OBTENCION_ARCHIVO,gvalues,size).GenerarPDFBultosDHLViajesApple(remitos, size.ToLower(), format);
+                    response.message = "Etiquetas generadas con exito";
+                    response.Archivos.Add(archivo);
+                }
                 else
                 {
                     remitos.ForEach(i => i.etiquetas.ForEach(e => etiquetasTotales.Add(e)));
                     hojas = GenerarEtiquetas(etiquetasTotales, null, etiquetaImg, size.ToLower(), format.ToLower(), template);
                 }
 
-                if(template.ToUpper() != TEMPLATE_VERTICAL && template.ToUpper() != TEMPLATE_BULTOSXD)
+                if (!TemplatesHabilitados.Contains(template.ToUpper()))
                 {
                     if (hojas.Count == 0)
                     {
@@ -539,6 +711,26 @@ public class WSEtiquetas : WebService
                             response.Archivos.Add(archivo);
                         }
                     }
+                    else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
+                    {
+                        //etiquetaBultosXDSeparada.Add(remito);
+                        ////var archivo = GenerarPDFBultosXD(etiquetaBultosXDSeparada, size.ToLower(), format.ToLower());
+
+                        //if (archivo != null)
+                        //{
+                        //    response.Archivos.Add(archivo);
+                        //}
+                    }
+                    else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
+                    {
+                      //  etiquetaBultosXDSeparada.Add(remito);
+                      ////  var archivo = GenerarPDFBultosXD(etiquetaBultosXDSeparada, size.ToLower(), format.ToLower());
+
+                      //  if (archivo != null)
+                      //  {
+                      //      response.Archivos.Add(archivo);
+                      //  }
+                    }
                     else
                     {
                         hojas = GenerarEtiquetas(remito.etiquetas, null, etiquetaImg, size.ToLower(), format.ToLower(), template);
@@ -552,13 +744,13 @@ public class WSEtiquetas : WebService
                     }
 
                     // Modificacion Matias -- Para que todo funcione solo entra aca si no es bultos vertical asi los demas templates siguen funcionando. Si es template vertical ya tendra la respuesta.
-                    if (template.ToUpper() != TEMPLATE_VERTICAL && template.ToUpper() != TEMPLATE_BULTOSXD)
+                    if (TemplatesHabilitados.Contains(template.ToUpper()))
                     {
                         response = imprimirHojas(hojas, response, format, size);
                     }
-                    
+
                 }
-                if (template.ToUpper() != TEMPLATE_BULTOSXD)
+                if (template.ToUpper() != TEMPLATE_BULTOSXD && template.ToUpper() != TEMPLATE_BULTOS_DHL_APPLE && template.ToUpper() != TEMPLATE_VIAJES_DHL_Apple)
                 {
                     response.message = "Etiquetas generadas con exito";
                     return response;
@@ -573,7 +765,7 @@ public class WSEtiquetas : WebService
                     remitos.ForEach(i => i.etiquetasVerticales.ForEach(e => etiquetasVerticalTotales.Add(e)));
                     hojas = GenerarEtiquetas(null, etiquetasVerticalTotales, etiquetaImg, size.ToLower(), format.ToLower(), template);
                 }
-                else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOSXD))
+                else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOSXD) || string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE) || string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
                 {
                     log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "El template: " + template + " no admite el formato: " + format);
                     response.message = "No se admite el formato ingresado.";
@@ -585,7 +777,7 @@ public class WSEtiquetas : WebService
                     hojas = GenerarEtiquetas(etiquetasTotales, null, etiquetaImg, size.ToLower(), format.ToLower(), template);
                 }
 
-                if ((template.ToUpper() != TEMPLATE_BULTOSXD))
+                if ((template.ToUpper() != TEMPLATE_BULTOSXD) && (template.ToUpper() != TEMPLATE_BULTOS_DHL_APPLE) && (template.ToUpper() != TEMPLATE_VIAJES_DHL_Apple))
                 {
                     int index = 0;
                     foreach (Bitmap hoja in hojas)
@@ -654,7 +846,7 @@ public class WSEtiquetas : WebService
                         }
                     }
                 }
-                
+
             }
             #endregion
 
@@ -663,7 +855,7 @@ public class WSEtiquetas : WebService
             sendMail.SendMailLogs();
 
             if (connDB.State == ConnectionState.Open) connDB.Close();
-            if (connLog.State == ConnectionState.Open) connLog.Close(); 
+            if (connLog.State == ConnectionState.Open) connLog.Close();
             response.message = "Etiquetas generadas con exito para IDRemito: " + IDRemito + " - Cliente: " + cliente;
             return response;
         }
@@ -682,7 +874,7 @@ public class WSEtiquetas : WebService
     private Archivo GenerarPDFBultosVertical(List<BultosVertical> lEtiquetasVertical, string size, string format)
     {
         Archivo archivoPdf = new Archivo();
-        
+
         PageSize pageSize = null;
         #region Aca seteo el tamaño de pagina si es a4 o zebra 
         if (size.ToUpper().Equals("A4"))
@@ -699,21 +891,21 @@ public class WSEtiquetas : WebService
         string ruta = gvalues.PathOut + "\\" + DateTime.Now.ToString("yyyyMMdd-hhmmssffff_")+ lEtiquetasVertical.Count() + ".pdf";
         PdfWriter writer = new PdfWriter(ruta);
         PdfDocument pdf = new PdfDocument(writer);
-        
+
         Document document = new Document(pdf, pageSize);
         document.SetMargins(0, 1, 0, 0);
 
         try
         {
-            
+
             if (!Directory.Exists(gvalues.PathOut))
             {
                 Directory.CreateDirectory(gvalues.PathOut);
             }
-            
+
 
             ImageData logo = ImageDataFactory.Create(gvalues.PathLogo);
-            
+
 
             int countBulto = 0;
             string idRemitoAux = string.Empty;
@@ -725,7 +917,7 @@ public class WSEtiquetas : WebService
 
                 System.Drawing.Image barcode1 = null;
                 ImageData codigoBarras = null;
-                
+
                 if (etq.TrackingNumber != null)
                 {
                     try
@@ -735,7 +927,7 @@ public class WSEtiquetas : WebService
                         bcWriter.Options = encodingBC;
                         bcWriter.Format = BarcodeFormat.CODE_128;
                         barcode1 = new Bitmap(bcWriter.Write(etq.TrackingNumber));
-                        var img = ImageToByte(barcode1);
+                        var img = new CommonHandler().ImageToByte(barcode1);
                         codigoBarras = ImageDataFactory.Create(img);
                     }
                     catch (Exception e)
@@ -743,7 +935,7 @@ public class WSEtiquetas : WebService
                         log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar codigo de barra para IDRemito: " + etq.IdRemito + ". Detalles: " + e.Message);
                     }
                 }
-                
+
                 //FIN - MODIFICACION - LFC - 7/7/20 - v1.2.0.0
 
                 //Variables legibles Esto lo copie de GABI, sinceramente me costo tiempo entender que hacia. Quiza lo reworkearia en un futuro. Por lo que entiendo itera por etiquetas y las etiquetas tienen bultos totales
@@ -903,7 +1095,7 @@ public class WSEtiquetas : WebService
 
             }
 
-            
+
             document.Close();
             writer.Close();
             pdf.Close();
@@ -915,7 +1107,7 @@ public class WSEtiquetas : WebService
                 Byte[] pdfEnByte = File.ReadAllBytes(ruta);
                 archivoPdf.base64 = Convert.ToBase64String(pdfEnByte);
                 archivoPdf.nombre = fileName;
-                
+
                 log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta PDFBultosVertical generada con exito Tamaño: " + size + " - Formato: " + format + ". Modo elegido: BASE64");
             }
             else if (MODO_OBTENCION_ARCHIVO == "URL")
@@ -979,7 +1171,7 @@ public class WSEtiquetas : WebService
                 #region Generacion de codigo de barras
                 System.Drawing.Image barcode1 = null;
                 ImageData codigoBarras = null;
-                
+
                 try
                 {
                     BarcodeWriter bcWriter = new BarcodeWriter();
@@ -987,7 +1179,7 @@ public class WSEtiquetas : WebService
                     bcWriter.Options = encodingBC;
                     bcWriter.Format = BarcodeFormat.CODE_128;
                     barcode1 = new Bitmap(bcWriter.Write(r.bultosXD.Nro_seguimiento));
-                    var img = ImageToByte(barcode1);
+                    var img = new CommonHandler().ImageToByte(barcode1);
                     codigoBarras = ImageDataFactory.Create(img);
                 }
                 catch (Exception e)
@@ -1030,7 +1222,7 @@ public class WSEtiquetas : WebService
                     #endregion
 
                     #region Aca creo la tabla del codigo de barra
-                    
+
                     Cell celdaCodigoBarras = (new Cell().Add(new iText.Layout.Element.Image(codigoBarras).SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
 
                     Table codigoBarra = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
@@ -1117,14 +1309,9 @@ public class WSEtiquetas : WebService
         }
     }
 
-    public static byte[] ImageToByte(System.Drawing.Image img)
-    {
-        using (var stream = new MemoryStream())
-        {
-            img.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-            return stream.ToArray();
-        }
-    }
+
+
+
 
     private Response imprimirHojas(List<Bitmap> hojas, Response response, string format, string size)
     {
@@ -2520,7 +2707,7 @@ public class WSEtiquetas : WebService
                         etiqueta = new Bitmap(bitmap);
                     }
 
-                  
+
                     if (etiqueta != null && barcode1 != null)
                     {
                         Graphics gBarcode1 = Graphics.FromImage(etiqueta);
@@ -2767,7 +2954,7 @@ public class WSEtiquetas : WebService
     {
         string str = "";
 
-        if(campo != null)
+        if (campo != null)
         {
             str = campo.ToString().Trim();
         }

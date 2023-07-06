@@ -7,7 +7,7 @@ using System.IO;
 
 namespace Tecnologistica
 {
-    internal class Globals
+    public class Globals
     {
         public class staticValues
         {
