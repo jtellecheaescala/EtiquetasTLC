@@ -29,49 +29,72 @@ public class HandlersEtiquetasApple
     private Globals.staticValues gvalues;
     private PageSize pageSize;
     private Archivo archivoPdf = new Archivo();
+    private string ruta;
+    private PdfWriter writer;
+    private PdfDocument pdf;
+    private Document document;
+    private ImageData logo;
+    private string size;
+    private string etiqueta;
 
-    public HandlersEtiquetasApple(Log _log, SqlConnection _connLog, Globals.staticValues.SeveridadesClass _severidades, string _MODO_OBTENCION_ARCHIVO, Globals.staticValues _gvalues, string size)
+
+    public HandlersEtiquetasApple(Log _log, SqlConnection _connLog, Globals.staticValues.SeveridadesClass _severidades, string _MODO_OBTENCION_ARCHIVO, Globals.staticValues _gvalues, string _size, string _etiqueta)
     {
         this.log = _log;
         this.connLog = _connLog;
         this.severidades = _severidades;
         this.MODO_OBTENCION_ARCHIVO = _MODO_OBTENCION_ARCHIVO;
         this.gvalues = _gvalues;
+        this.size = _size;
+        this.etiqueta = _etiqueta;
+        InicializarHandler();
+    }
 
-        if (size.ToUpper().Equals("A4"))
+    public void InicializarHandler()
+    {
+        try
         {
-            pageSize = PageSize.A4;
+            ruta = String.Format(@"{0}\{1}_{2}.pdf", gvalues.PathOut, etiqueta, DateTime.Now.ToString("yyyyMMdd-HHmmssffff"));
+
+            writer = new PdfWriter(ruta);
+            pdf = new PdfDocument(writer);
+
+            if (size.ToUpper().Equals("A4"))
+            {
+                pageSize = PageSize.A4;
+            }
+            else
+            {
+                pageSize = new PageSize(285, 285);
+            }
+
+            document = new Document(pdf, pageSize);
+            document.SetMargins(0, 1, 0, 0);
+
+            if (!Directory.Exists(gvalues.PathOut))
+            {
+                Directory.CreateDirectory(gvalues.PathOut);
+            }
+
+            logo = ImageDataFactory.Create(gvalues.PathLogo);
         }
-        else
+        catch (Exception ex)
         {
-            pageSize = new PageSize(285, 285);
+            log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", String.Format("Error al inicializar handler etiquetas Apple: {0}", ex.Message));
+            throw ex;
         }
     }
 
-    public Archivo GenerarPDFBultosDHLViajesApple(List<Remito> remitos, string size, string format )
+    public Archivo GenerarPDFBultosDHLViajesApple(List<Remito> remitos, string size, string format)
     {
         return null;
     }
 
     public Archivo GenerarPDFBultosDHLApple(List<Remito> remitos, string size, string format)
     {
-        
-        string ruta = gvalues.PathOut + "\\" + "BultosXD_" + DateTime.Now.ToString("yyyyMMdd-HHmmssffff") + ".pdf";
-        PdfWriter writer = new PdfWriter(ruta);
-        PdfDocument pdf = new PdfDocument(writer);
-
-        Document document = new Document(pdf, pageSize);
-        document.SetMargins(0, 1, 0, 0);
 
         try
         {
-            if (!Directory.Exists(gvalues.PathOut))
-            {
-                Directory.CreateDirectory(gvalues.PathOut);
-            }
-
-            ImageData logo = ImageDataFactory.Create(gvalues.PathLogo);
-
             foreach (var r in remitos)
             {
                 log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo de barra para IDRemito: " + r.ID_Remito);
@@ -87,7 +110,7 @@ public class HandlersEtiquetasApple
                     bcWriter.Options = encodingBC;
                     bcWriter.Format = BarcodeFormat.CODE_128;
                     barcode1 = new Bitmap(bcWriter.Write(r.bultosXD.Nro_seguimiento));
-                    var img = new CommonHandler().ImageToByte(barcode1);
+                    var img = new ImageHelper().ImageToByte(barcode1);
                     codigoBarras = ImageDataFactory.Create(img);
                 }
                 catch (Exception e)
@@ -206,14 +229,15 @@ public class HandlersEtiquetasApple
         }
         catch (Exception e)
         {
-            //Esto lo llamo a que si falla en algo la generacion del pdf libero los recursos de este pdf, porque sino queda siempre pegado y el programa nunca lo cierra hasta que se cae.
-            writer.Close();
-            pdf.Close();
-            document.Close();
-
             log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF" + e.Message.ToString());
 
             return archivoPdf;
+        }
+        finally
+        {
+            writer.Close();
+            pdf.Close();
+            document.Close();
         }
     }
 

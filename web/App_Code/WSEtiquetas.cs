@@ -343,7 +343,7 @@ public class WSEtiquetas : WebService
                         {
                             while (readerCantidad.Read())
                             {
-                                cantidadTotal = LimpiarCampo(readerCantidad["Cantidad"]);
+                                cantidadTotal = StringHelper.LimpiarCampo(readerCantidad["Cantidad"]);
                             }
                         }
                         else
@@ -377,17 +377,17 @@ public class WSEtiquetas : WebService
 
                                 BultosXD nBultoXD = new BultosXD();
 
-                                nBultoXD.Origen = LimpiarCampo(readerData["Origen"]);
-                                nBultoXD.Domicilio = LimpiarCampo(readerData["Domicilio"]);
-                                nBultoXD.Localidad = LimpiarCampo(readerData["Localidad"]);
-                                nBultoXD.Mail = LimpiarCampo(readerData["Mail"]);
-                                nBultoXD.Url = LimpiarCampo(readerData["Url"]);
-                                nBultoXD.Nro_seguimiento = LimpiarCampo(readerData["Nro_seguimiento"]);
-                                nBultoXD.Fecha = LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
-                                nBultoXD.Destino_cod = LimpiarCampo(readerData["Destino_cod"]);
-                                nBultoXD.Bultos = LimpiarCampo(readerData["Bultos"]);
-                                nBultoXD.Destino_razon_soc = LimpiarCampo(readerData["Destino_razon_soc"]);
-                                nBultoXD.Tipo_servicio = LimpiarCampo(readerData["Tipo_servicio"]);
+                                nBultoXD.Origen = StringHelper.LimpiarCampo(readerData["Origen"]);
+                                nBultoXD.Domicilio = StringHelper.LimpiarCampo(readerData["Domicilio"]);
+                                nBultoXD.Localidad = StringHelper.LimpiarCampo(readerData["Localidad"]);
+                                nBultoXD.Mail = StringHelper.LimpiarCampo(readerData["Mail"]);
+                                nBultoXD.Url = StringHelper.LimpiarCampo(readerData["Url"]);
+                                nBultoXD.Nro_seguimiento = StringHelper.LimpiarCampo(readerData["Nro_seguimiento"]);
+                                nBultoXD.Fecha = StringHelper.LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
+                                nBultoXD.Destino_cod = StringHelper.LimpiarCampo(readerData["Destino_cod"]);
+                                nBultoXD.Bultos = StringHelper.LimpiarCampo(readerData["Bultos"]);
+                                nBultoXD.Destino_razon_soc = StringHelper.LimpiarCampo(readerData["Destino_razon_soc"]);
+                                nBultoXD.Tipo_servicio = StringHelper.LimpiarCampo(readerData["Tipo_servicio"]);
                                 nBultoXD.Cantidad_etiquetas = Convert.ToInt32(cantidadTotal);
 
                                 remitos.Add(new Remito(int.Parse(sIDRemito), nBultoXD));
@@ -421,7 +421,7 @@ public class WSEtiquetas : WebService
                         {
                             while (readerCantidad.Read())
                             {
-                                cantidadTotal = LimpiarCampo(readerCantidad["Cantidad"]);
+                                cantidadTotal = StringHelper.LimpiarCampo(readerCantidad["Cantidad"]);
                             }
                         }
                         else
@@ -455,17 +455,17 @@ public class WSEtiquetas : WebService
 
                                 BultosXD nBultoXD = new BultosXD();
 
-                                nBultoXD.Origen = LimpiarCampo(readerData["Origen"]);
-                                nBultoXD.Domicilio = LimpiarCampo(readerData["Domicilio"]);
-                                nBultoXD.Localidad = LimpiarCampo(readerData["Localidad"]);
-                                nBultoXD.Mail = LimpiarCampo(readerData["Mail"]);
-                                nBultoXD.Url = LimpiarCampo(readerData["Url"]);
-                                nBultoXD.Nro_seguimiento = LimpiarCampo(readerData["Nro_seguimiento"]);
-                                nBultoXD.Fecha = LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
-                                nBultoXD.Destino_cod = LimpiarCampo(readerData["Destino_cod"]);
-                                nBultoXD.Bultos = LimpiarCampo(readerData["Bultos"]);
-                                nBultoXD.Destino_razon_soc = LimpiarCampo(readerData["Destino_razon_soc"]);
-                                nBultoXD.Tipo_servicio = LimpiarCampo(readerData["Tipo_servicio"]);
+                                nBultoXD.Origen = StringHelper.LimpiarCampo(readerData["Origen"]);
+                                nBultoXD.Domicilio = StringHelper.LimpiarCampo(readerData["Domicilio"]);
+                                nBultoXD.Localidad = StringHelper.LimpiarCampo(readerData["Localidad"]);
+                                nBultoXD.Mail = StringHelper.LimpiarCampo(readerData["Mail"]);
+                                nBultoXD.Url = StringHelper.LimpiarCampo(readerData["Url"]);
+                                nBultoXD.Nro_seguimiento = StringHelper.LimpiarCampo(readerData["Nro_seguimiento"]);
+                                nBultoXD.Fecha = StringHelper.LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
+                                nBultoXD.Destino_cod = StringHelper.LimpiarCampo(readerData["Destino_cod"]);
+                                nBultoXD.Bultos = StringHelper.LimpiarCampo(readerData["Bultos"]);
+                                nBultoXD.Destino_razon_soc = StringHelper.LimpiarCampo(readerData["Destino_razon_soc"]);
+                                nBultoXD.Tipo_servicio = StringHelper.LimpiarCampo(readerData["Tipo_servicio"]);
                                 nBultoXD.Cantidad_etiquetas = Convert.ToInt32(cantidadTotal);
 
                                 remitos.Add(new Remito(int.Parse(sIDRemito), nBultoXD));
@@ -499,7 +499,7 @@ public class WSEtiquetas : WebService
                         {
                             while (readerCantidad.Read())
                             {
-                                cantidadTotal = LimpiarCampo(readerCantidad["Cantidad"]);
+                                cantidadTotal = StringHelper.LimpiarCampo(readerCantidad["Cantidad"]);
                             }
                         }
                         else
@@ -533,17 +533,17 @@ public class WSEtiquetas : WebService
 
                                 BultosXD nBultoXD = new BultosXD();
 
-                                nBultoXD.Origen = LimpiarCampo(readerData["Origen"]);
-                                nBultoXD.Domicilio = LimpiarCampo(readerData["Domicilio"]);
-                                nBultoXD.Localidad = LimpiarCampo(readerData["Localidad"]);
-                                nBultoXD.Mail = LimpiarCampo(readerData["Mail"]);
-                                nBultoXD.Url = LimpiarCampo(readerData["Url"]);
-                                nBultoXD.Nro_seguimiento = LimpiarCampo(readerData["Nro_seguimiento"]);
-                                nBultoXD.Fecha = LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
-                                nBultoXD.Destino_cod = LimpiarCampo(readerData["Destino_cod"]);
-                                nBultoXD.Bultos = LimpiarCampo(readerData["Bultos"]);
-                                nBultoXD.Destino_razon_soc = LimpiarCampo(readerData["Destino_razon_soc"]);
-                                nBultoXD.Tipo_servicio = LimpiarCampo(readerData["Tipo_servicio"]);
+                                nBultoXD.Origen = StringHelper.LimpiarCampo(readerData["Origen"]);
+                                nBultoXD.Domicilio = StringHelper.LimpiarCampo(readerData["Domicilio"]);
+                                nBultoXD.Localidad = StringHelper.LimpiarCampo(readerData["Localidad"]);
+                                nBultoXD.Mail = StringHelper.LimpiarCampo(readerData["Mail"]);
+                                nBultoXD.Url = StringHelper.LimpiarCampo(readerData["Url"]);
+                                nBultoXD.Nro_seguimiento = StringHelper.LimpiarCampo(readerData["Nro_seguimiento"]);
+                                nBultoXD.Fecha = StringHelper.LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
+                                nBultoXD.Destino_cod = StringHelper.LimpiarCampo(readerData["Destino_cod"]);
+                                nBultoXD.Bultos = StringHelper.LimpiarCampo(readerData["Bultos"]);
+                                nBultoXD.Destino_razon_soc = StringHelper.LimpiarCampo(readerData["Destino_razon_soc"]);
+                                nBultoXD.Tipo_servicio = StringHelper.LimpiarCampo(readerData["Tipo_servicio"]);
                                 nBultoXD.Cantidad_etiquetas = Convert.ToInt32(cantidadTotal);
 
                                 remitos.Add(new Remito(int.Parse(sIDRemito), nBultoXD));
@@ -652,13 +652,13 @@ public class WSEtiquetas : WebService
                 }
                 else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
                 {
-                    var archivo = new HandlersEtiquetasApple(log, connLog, severidades, MODO_OBTENCION_ARCHIVO, gvalues, size).GenerarPDFBultosDHLApple(remitos, size.ToLower(), format);
+                    var archivo = new HandlersEtiquetasApple(log, connLog, severidades, MODO_OBTENCION_ARCHIVO, gvalues, size, TEMPLATE_BULTOS_DHL_APPLE).GenerarPDFBultosDHLApple(remitos, size.ToLower(), format);
                     response.message = "Etiquetas generadas con exito";
                     response.Archivos.Add(archivo);
                 }
                 else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
                 { 
-                    var archivo = new HandlersEtiquetasApple(log,connLog,severidades,MODO_OBTENCION_ARCHIVO,gvalues,size).GenerarPDFBultosDHLViajesApple(remitos, size.ToLower(), format);
+                    var archivo = new HandlersEtiquetasApple(log,connLog,severidades,MODO_OBTENCION_ARCHIVO,gvalues,size, TEMPLATE_VIAJES_DHL_Apple).GenerarPDFBultosDHLViajesApple(remitos, size.ToLower(), format);
                     response.message = "Etiquetas generadas con exito";
                     response.Archivos.Add(archivo);
                 }
@@ -927,7 +927,7 @@ public class WSEtiquetas : WebService
                         bcWriter.Options = encodingBC;
                         bcWriter.Format = BarcodeFormat.CODE_128;
                         barcode1 = new Bitmap(bcWriter.Write(etq.TrackingNumber));
-                        var img = new CommonHandler().ImageToByte(barcode1);
+                        var img = new ImageHelper().ImageToByte(barcode1);
                         codigoBarras = ImageDataFactory.Create(img);
                     }
                     catch (Exception e)
@@ -1179,7 +1179,7 @@ public class WSEtiquetas : WebService
                     bcWriter.Options = encodingBC;
                     bcWriter.Format = BarcodeFormat.CODE_128;
                     barcode1 = new Bitmap(bcWriter.Write(r.bultosXD.Nro_seguimiento));
-                    var img = new CommonHandler().ImageToByte(barcode1);
+                    var img = new ImageHelper().ImageToByte(barcode1);
                     codigoBarras = ImageDataFactory.Create(img);
                 }
                 catch (Exception e)
@@ -2674,16 +2674,16 @@ public class WSEtiquetas : WebService
                                 graphics.DrawString(etq.TrackingNumber, arial, Brushes.Black, pBV_TrackingNo_2);
 
                                 graphics.DrawString(etq.Origen, arial, Brushes.Black, pBV_Origen);
-                                graphics.DrawString(SubstringChecked("Ciudad: " + etq.Origen_Ciudad, lenLine, lenLine - 5)[0], arial, Brushes.Black, pBV_Origen_Ciudad_1);
-                                graphics.DrawString(SubstringChecked("Ciudad: " + etq.Origen_Ciudad, lenLine, lenLine - 5)[1], arial, Brushes.Black, pBV_Origen_Ciudad_2);
-                                graphics.DrawString(SubstringChecked("Dirección: " + etq.Origen_Direccion, lenLine, lenLine - 5)[0], arial, Brushes.Black, pBV_Origen_Direccion_1);
-                                graphics.DrawString(SubstringChecked("Dirección: " + etq.Origen_Direccion, lenLine, lenLine - 5)[1], arial, Brushes.Black, pBV_Origen_Direccion_2);
+                                graphics.DrawString(StringHelper.SubstringChecked("Ciudad: " + etq.Origen_Ciudad, lenLine, lenLine - 5)[0], arial, Brushes.Black, pBV_Origen_Ciudad_1);
+                                graphics.DrawString(StringHelper.SubstringChecked("Ciudad: " + etq.Origen_Ciudad, lenLine, lenLine - 5)[1], arial, Brushes.Black, pBV_Origen_Ciudad_2);
+                                graphics.DrawString(StringHelper.SubstringChecked("Dirección: " + etq.Origen_Direccion, lenLine, lenLine - 5)[0], arial, Brushes.Black, pBV_Origen_Direccion_1);
+                                graphics.DrawString(StringHelper.SubstringChecked("Dirección: " + etq.Origen_Direccion, lenLine, lenLine - 5)[1], arial, Brushes.Black, pBV_Origen_Direccion_2);
 
                                 graphics.DrawString(etq.Destino, arial, Brushes.Black, pBV_Destino);
-                                graphics.DrawString(SubstringChecked("Ciudad: " + etq.Destino_Ciudad, lenLine, lenLine - 5)[0], arial, Brushes.Black, pBV_Destino_Ciudad_1);
-                                graphics.DrawString(SubstringChecked("Ciudad: " + etq.Destino_Ciudad, lenLine, lenLine - 5)[1], arial, Brushes.Black, pBV_Destino_Ciudad_2);
-                                graphics.DrawString(SubstringChecked("Dirección: " + etq.Destino_Direccion, lenLine, lenLine)[0], arial, Brushes.Black, pBV_Destino_Direccion_1);
-                                graphics.DrawString(SubstringChecked("Dirección: " + etq.Destino_Direccion, lenLine, lenLine)[1], arial, Brushes.Black, pBV_Destino_Direccion_2);
+                                graphics.DrawString(StringHelper.SubstringChecked("Ciudad: " + etq.Destino_Ciudad, lenLine, lenLine - 5)[0], arial, Brushes.Black, pBV_Destino_Ciudad_1);
+                                graphics.DrawString(StringHelper.SubstringChecked("Ciudad: " + etq.Destino_Ciudad, lenLine, lenLine - 5)[1], arial, Brushes.Black, pBV_Destino_Ciudad_2);
+                                graphics.DrawString(StringHelper.SubstringChecked("Dirección: " + etq.Destino_Direccion, lenLine, lenLine)[0], arial, Brushes.Black, pBV_Destino_Direccion_1);
+                                graphics.DrawString(StringHelper.SubstringChecked("Dirección: " + etq.Destino_Direccion, lenLine, lenLine)[1], arial, Brushes.Black, pBV_Destino_Direccion_2);
                                 graphics.DrawString("Contacto: " + etq.Destino_Contacto, arial, Brushes.Black, pBV_Destino_Contacto);
                                 graphics.DrawString("Teléfono: " + etq.Destino_Telefono, arial, Brushes.Black, pBV_Destino_Telefono);
 
@@ -2698,8 +2698,8 @@ public class WSEtiquetas : WebService
                                 graphics.DrawString(etq.NroDcto, arial, Brushes.Black, pBV_NroDcto);
                                 graphics.DrawString(etq.NroPedido, arial, Brushes.Black, pBV_NroPedido);
                                 graphics.DrawString(etq.Conocimiento, arial, Brushes.Black, pBV_Conocimiento);
-                                graphics.DrawString(SubstringChecked(etq.Comentario, lenLine, lenLine - 5)[0], arial, Brushes.Black, pBV_Comentario_1);
-                                graphics.DrawString(SubstringChecked(etq.Comentario, lenLine, lenLine - 5)[1], arial, Brushes.Black, pBV_Comentario_2);
+                                graphics.DrawString(StringHelper.SubstringChecked(etq.Comentario, lenLine, lenLine - 5)[0], arial, Brushes.Black, pBV_Comentario_1);
+                                graphics.DrawString(StringHelper.SubstringChecked(etq.Comentario, lenLine, lenLine - 5)[1], arial, Brushes.Black, pBV_Comentario_2);
 
                             }
                             //FIN - MODIFICACION - LFC - 7/7/20 - v1.2.0.0
@@ -2933,32 +2933,5 @@ public class WSEtiquetas : WebService
         return hojas;
     }
 
-    ////esto de aca sirve para separar en 2 renglones un string input es el string que queres separar
-    ///lenMax es el largo maximo que aguanta el renglon donde lo quieras meter
-    ///len es la cantidad de caracteres donde queres cortar
-    public static string[] SubstringChecked(string input, int lenMax, int len)
-    {
-        string[] ret = new string[2];
-        if (input.Length > lenMax)
-        {
-            ret[0] = input.Substring(0, len);
-            ret[1] = input.Substring(len);
-        }
-        else
-            ret[0] = input;
 
-        return ret;
-    }
-
-    private string LimpiarCampo(object campo)
-    {
-        string str = "";
-
-        if (campo != null)
-        {
-            str = campo.ToString().Trim();
-        }
-
-        return str;
-    }
 }
