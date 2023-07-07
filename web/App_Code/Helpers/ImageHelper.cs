@@ -1,10 +1,13 @@
-﻿using System;
+﻿using iText.IO.Image;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Web;
 using Tecnologistica;
+using ZXing;
+using ZXing.Common;
 
 public class ImageHelper
 {
@@ -38,5 +41,23 @@ public class ImageHelper
             gHoja.DrawImage(Globals.ResizeImage(etiqueta, 1006, 640), 0, 0);
         }
         return hoja;
+    }
+
+    public ImageData CrearCodigoBarras(string codigo)
+    {
+
+        ImageData codigoBarras = null;
+        Image barcode1 = null;
+
+        BarcodeWriter bcWriter = new BarcodeWriter();
+        EncodingOptions encodingBC = new EncodingOptions() { Width = 400, Height = 100, Margin = 0, PureBarcode = true };
+        bcWriter.Options = encodingBC;
+        bcWriter.Format = BarcodeFormat.CODE_128;
+        barcode1 = new Bitmap(bcWriter.Write(codigo));
+        var img = new ImageHelper().ImageToByte(barcode1);
+        codigoBarras = ImageDataFactory.Create(img);
+
+        return codigoBarras;
+    
     }
 }

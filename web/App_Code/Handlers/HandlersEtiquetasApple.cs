@@ -204,8 +204,6 @@ public class HandlersEtiquetasApple
                 }
             }
 
-            document.Close();
-            writer.Close();
             pdf.Close();
 
             string fileName = System.IO.Path.GetFileName(ruta);
@@ -235,9 +233,9 @@ public class HandlersEtiquetasApple
         }
         finally
         {
+            document.Close();
             writer.Close();
             pdf.Close();
-            document.Close();
         }
     }
 

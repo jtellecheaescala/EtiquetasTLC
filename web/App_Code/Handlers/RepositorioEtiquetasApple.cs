@@ -10,7 +10,7 @@ using Tecnologistica;
 /// <summary>
 /// Summary description for HandlersEtiquetasAppleDB
 /// </summary>
-public class HandlersEtiquetasAppleDB
+public class RepositorioEtiquetasApple
 {
     private QueriesSQL queriesSQL = new QueriesSQL();
 
