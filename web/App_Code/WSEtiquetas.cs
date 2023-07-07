@@ -405,81 +405,88 @@ public class WSEtiquetas : WebService
                 }
                 else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
                 {
-                    using (SqlDataReader readerCantidad = new SqlCommand
+                    string message;
+                    remitos = new HandlersEtiquetasAppleDB().ObtenerRemitosBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente, out message);
+                    if(remitos.Count() == 0)
                     {
-                        Connection = connDB,
-                        CommandType = CommandType.Text,
-                        CommandTimeout = timeOutQueries,
-                        CommandText = queriesSQL.cant_BultosXD,
-                        Parameters =
-                        {
-                            new SqlParameter { ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
-                        }
-                    }.ExecuteReader())
-                    {
-                        if (readerCantidad.HasRows)
-                        {
-                            while (readerCantidad.Read())
-                            {
-                                cantidadTotal = StringHelper.LimpiarCampo(readerCantidad["Cantidad"]);
-                            }
-                        }
-                        else
-                        {
-                            log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente);
-                            if (connDB.State == ConnectionState.Open) connDB.Close();
-                            if (connLog.State == ConnectionState.Open) connLog.Close();
-                            response.message = "ERROR: Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente;
-                            return response;
-                        }
+                        response.message = message;
+                        return response;
                     }
+                    //using (SqlDataReader readerCantidad = new SqlCommand
+                    //{
+                    //    Connection = connDB,
+                    //    CommandType = CommandType.Text,
+                    //    CommandTimeout = timeOutQueries,
+                    //    CommandText = queriesSQL.cant_BultosXD,
+                    //    Parameters =
+                    //    {
+                    //        new SqlParameter { ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
+                    //    }
+                    //}.ExecuteReader())
+                    //{
+                    //    if (readerCantidad.HasRows)
+                    //    {
+                    //        while (readerCantidad.Read())
+                    //        {
+                    //            cantidadTotal = StringHelper.LimpiarCampo(readerCantidad["Cantidad"]);
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                    //        if (connDB.State == ConnectionState.Open) connDB.Close();
+                    //        if (connLog.State == ConnectionState.Open) connLog.Close();
+                    //        response.message = "ERROR: Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                    //        return response;
+                    //    }
+                    //}
 
-                    using (SqlDataReader readerData = new SqlCommand
-                    {
-                        Connection = connDB,
-                        CommandType = CommandType.Text,
-                        CommandTimeout = timeOutQueries,
-                        CommandText = queriesSQL.sRemitosBultosXD,
-                        Parameters =
-                        {
-                            new SqlParameter {ParameterName = "@CodCliente", SqlDbType = SqlDbType.Int, Value = int.Parse(cliente)},
-                            new SqlParameter {ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
-                        }
-                    }.ExecuteReader())
-                    {
-                        if (readerData.HasRows)
-                        {
-                            while (readerData.Read())
-                            {
-                                etiquetasCount++;
+                    //using (SqlDataReader readerData = new SqlCommand
+                    //{
+                    //    Connection = connDB,
+                    //    CommandType = CommandType.Text,
+                    //    CommandTimeout = timeOutQueries,
+                    //    CommandText = queriesSQL.sRemitosBultosXD,
+                    //    Parameters =
+                    //    {
+                    //        new SqlParameter {ParameterName = "@CodCliente", SqlDbType = SqlDbType.Int, Value = int.Parse(cliente)},
+                    //        new SqlParameter {ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
+                    //    }
+                    //}.ExecuteReader())
+                    //{
+                    //    if (readerData.HasRows)
+                    //    {
+                    //        while (readerData.Read())
+                    //        {
+                    //            etiquetasCount++;
 
-                                BultosXD nBultoXD = new BultosXD();
+                    //            BultosXD nBultoXD = new BultosXD();
 
-                                nBultoXD.Origen = StringHelper.LimpiarCampo(readerData["Origen"]);
-                                nBultoXD.Domicilio = StringHelper.LimpiarCampo(readerData["Domicilio"]);
-                                nBultoXD.Localidad = StringHelper.LimpiarCampo(readerData["Localidad"]);
-                                nBultoXD.Mail = StringHelper.LimpiarCampo(readerData["Mail"]);
-                                nBultoXD.Url = StringHelper.LimpiarCampo(readerData["Url"]);
-                                nBultoXD.Nro_seguimiento = StringHelper.LimpiarCampo(readerData["Nro_seguimiento"]);
-                                nBultoXD.Fecha = StringHelper.LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
-                                nBultoXD.Destino_cod = StringHelper.LimpiarCampo(readerData["Destino_cod"]);
-                                nBultoXD.Bultos = StringHelper.LimpiarCampo(readerData["Bultos"]);
-                                nBultoXD.Destino_razon_soc = StringHelper.LimpiarCampo(readerData["Destino_razon_soc"]);
-                                nBultoXD.Tipo_servicio = StringHelper.LimpiarCampo(readerData["Tipo_servicio"]);
-                                nBultoXD.Cantidad_etiquetas = Convert.ToInt32(cantidadTotal);
+                    //            nBultoXD.Origen = StringHelper.LimpiarCampo(readerData["Origen"]);
+                    //            nBultoXD.Domicilio = StringHelper.LimpiarCampo(readerData["Domicilio"]);
+                    //            nBultoXD.Localidad = StringHelper.LimpiarCampo(readerData["Localidad"]);
+                    //            nBultoXD.Mail = StringHelper.LimpiarCampo(readerData["Mail"]);
+                    //            nBultoXD.Url = StringHelper.LimpiarCampo(readerData["Url"]);
+                    //            nBultoXD.Nro_seguimiento = StringHelper.LimpiarCampo(readerData["Nro_seguimiento"]);
+                    //            nBultoXD.Fecha = StringHelper.LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
+                    //            nBultoXD.Destino_cod = StringHelper.LimpiarCampo(readerData["Destino_cod"]);
+                    //            nBultoXD.Bultos = StringHelper.LimpiarCampo(readerData["Bultos"]);
+                    //            nBultoXD.Destino_razon_soc = StringHelper.LimpiarCampo(readerData["Destino_razon_soc"]);
+                    //            nBultoXD.Tipo_servicio = StringHelper.LimpiarCampo(readerData["Tipo_servicio"]);
+                    //            nBultoXD.Cantidad_etiquetas = Convert.ToInt32(cantidadTotal);
 
-                                remitos.Add(new Remito(int.Parse(sIDRemito), nBultoXD));
-                            }
-                        }
-                        else
-                        {
-                            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente);
-                            if (connDB.State == ConnectionState.Open) connDB.Close();
-                            if (connLog.State == ConnectionState.Open) connLog.Close();
-                            response.message = "Notificacion: No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente;
-                            return response;
-                        }
-                    }
+                    //            remitos.Add(new Remito(int.Parse(sIDRemito), nBultoXD));
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                    //        if (connDB.State == ConnectionState.Open) connDB.Close();
+                    //        if (connLog.State == ConnectionState.Open) connLog.Close();
+                    //        response.message = "Notificacion: No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                    //        return response;
+                    //    }
+                    //}
                 }
                 else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
                 {

@@ -14,13 +14,6 @@ public class HandlersEtiquetasAppleDB
 {
     private QueriesSQL queriesSQL = new QueriesSQL();
 
-    public HandlersEtiquetasAppleDB()
-    {
-        //
-        // TODO: Add constructor logic here
-        //
-    }
-
     public List<Remito> ObtenerRemitosBultosDHLApple(SqlConnection connDB, Log log, SqlConnection connLog, Globals.staticValues.SeveridadesClass severidades, int timeOutQueries, string sIDRemito, string cliente, out string message)
     {
         List<Remito> remitos = new List<Remito>();
