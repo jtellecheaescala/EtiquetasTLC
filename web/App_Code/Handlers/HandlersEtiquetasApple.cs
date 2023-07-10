@@ -87,12 +87,6 @@ public class HandlersEtiquetasApple
 
     public Archivo GenerarPDFBultosDHLViajesApple(List<Remito> remitos, string size, string format)
     {
-        return null;
-    }
-
-    public Archivo GenerarPDFBultosDHLApple(List<Remito> remitos, string size, string format)
-    {
-
         try
         {
             foreach (var r in remitos)
@@ -200,6 +194,171 @@ public class HandlersEtiquetasApple
                     document.Add(tbContenido);
 
                     #endregion
+
+                }
+            }
+
+            pdf.Close();
+
+            string fileName = System.IO.Path.GetFileName(ruta);
+            if (MODO_OBTENCION_ARCHIVO == "BASE64")
+            {
+                Byte[] pdfEnByte = File.ReadAllBytes(ruta);
+                archivoPdf.base64 = Convert.ToBase64String(pdfEnByte);
+                archivoPdf.nombre = fileName;
+
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta PDFBultosVertical generada con exito Tamaño: " + size + " - Formato: " + format + ". Modo elegido: BASE64");
+            }
+            else if (MODO_OBTENCION_ARCHIVO == "URL")
+            {
+                string url = System.IO.Path.Combine(gvalues.RaizURL, fileName);
+                archivoPdf.url = url;
+                archivoPdf.nombre = fileName;
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta generada con exito - Tamaño: " + size + " - Formato: " + format + ". Modo elegido: URL");
+            }
+
+            return archivoPdf;
+        }
+        catch (Exception e)
+        {
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF" + e.Message.ToString());
+
+            return archivoPdf;
+        }
+        finally
+        {
+            document.Close();
+            writer.Close();
+            pdf.Close();
+        }
+    
+}
+
+    public Archivo GenerarPDFBultosDHLApple(List<Remito> remitos, string size, string format)
+    {
+
+        try
+        {
+            foreach (var r in remitos)
+            {
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo de barra para IDRemito: " + r.ID_Remito);
+
+                System.Drawing.Image barcode1 = null;
+                ImageData codigoBarras = null;
+
+                //try
+                //{
+                //    codigoBarras = new ImageHelper().CrearCodigoBarras(r.bultosXD.Nro_seguimiento);
+                //}
+                //catch (Exception e)
+                //{
+                //    log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar codigo de barra para IDRemito: " + r.ID_Remito + ". Detalles: " + e.Message);
+                //}
+
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas para IDRemito: " + r.ID_Remito + " - Tamaño: " + size + " - Formato: " + format);
+
+                for (int bulto = 1; bulto <= r.bultosXD.Cantidad_etiquetas; bulto++)
+                {
+
+                    Table tablaEncabezado = new Table(UnitValue.CreatePercentArray(new float[] { 60, 40 }));
+
+                    tablaEncabezado.AddCell(new Cell().Add(new Paragraph("Viaje:").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
+                                                        //.Add(new Paragraph("123456").SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                        //.Add(new Paragraph(r.bultosXD.Localidad).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                        //.Add(new Paragraph(r.bultosXD.Mail).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                        //.Add(new Paragraph(r.bultosXD.Url).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                        .SetBorder(Border.NO_BORDER))
+                                    .SetMinHeight(35).SetMaxHeight(35);
+                    //tablaEncabezado.AddCell(new Cell().Add(new iText.Layout.Element.Image(logo).SetAutoScale(true).SetPadding(0).SetMargins(2, 5, 0, 0).SetHorizontalAlignment(HorizontalAlignment.RIGHT)).SetBorder(Border.NO_BORDER)
+                    //    .Add(new Paragraph(r.bultosXD.Tipo_servicio).SetMultipliedLeading(1).SetMarginTop(9).SetFontSize(9).SetTextAlignment(TextAlignment.CENTER).SetMinHeight(20).SetMaxHeight(20).SetMaxWidth(160)))
+                    //    .SetMinHeight(75).SetMaxHeight(75);
+                    tablaEncabezado.AddCell(new Cell().Add(new Paragraph("Parada:").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
+                                             //.Add(new Paragraph("123456").SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                             //.Add(new Paragraph(r.bultosXD.Localidad).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                             //.Add(new Paragraph(r.bultosXD.Mail).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                             //.Add(new Paragraph(r.bultosXD.Url).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                             .SetBorder(Border.NO_BORDER))
+                         .SetMinHeight(35).SetMaxHeight(35);
+                    //tablaEncabezado.AddCell(new Cell().Add(new iText.Layout.Element.Image(logo).SetAutoScale(true).SetPadding(0).SetMargins(2, 5, 0, 0).SetHorizontalAlignment(HorizontalAlignment.RIGHT)).SetBorder(Border.NO_BORDER)
+                    //    .Add(new Paragraph(r.bultosXD.Tipo_servicio).SetMultipliedLeading(1).SetMarginTop(9).SetFontSize(9).SetTextAlignment(TextAlignment.CENTER).SetMinHeight(20).SetMaxHeight(20).SetMaxWidth(160)))
+                    //    .SetMinHeight(75).SetMaxHeight(75);
+                    tablaEncabezado.SetWidth(UnitValue.CreatePercentValue(100));
+                    tablaEncabezado.SetHeight(UnitValue.CreatePercentValue(100));
+                    tablaEncabezado.SetMargins(6, 1, 0, 6);
+
+                    document.Add(tablaEncabezado);
+
+
+
+                    //Table tbNroSeguimiento = new Table(UnitValue.CreatePercentArray(new float[] { 60, 40 }));
+                    //tbNroSeguimiento.AddCell(new Cell().Add(new Paragraph("Número de Seguimiento: ").SetFontSize(13).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetBorder(Border.NO_BORDER));
+                    //tbNroSeguimiento.AddCell(new Cell().Add(new Paragraph(r.bultosXD.Nro_seguimiento).SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
+                    //tbNroSeguimiento.SetMargins(0, 0, 0, 6);
+
+                    //document.Add(tbNroSeguimiento);
+
+
+                    //Cell celdaCodigoBarras = (new Cell().Add(new iText.Layout.Element.Image(codigoBarras).SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
+
+                    //Table codigoBarra = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
+                    //codigoBarra.AddCell(new Cell().Add(new Paragraph("Fecha: " + r.bultosXD.Fecha).SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMargins(15, 0, 0, 2)).SetBorder(Border.NO_BORDER));
+                    //codigoBarra.AddCell(celdaCodigoBarras.SetBorder(Border.NO_BORDER));
+                    //codigoBarra.SetWidth(UnitValue.CreatePercentValue(100));
+                    //codigoBarra.SetMarginLeft(4);
+
+                    //document.Add(codigoBarra);
+
+
+                    //Table tbtDescIndicadores = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
+                    //tbtDescIndicadores.AddCell(new Cell().Add(new Paragraph("DESTINO").SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
+                    //tbtDescIndicadores.AddCell(new Cell().Add(new Paragraph("BULTOS").SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
+                    //tbtDescIndicadores.SetWidth(UnitValue.CreatePercentValue(100));
+                    //tbtDescIndicadores.SetMargins(4, 0, 0, 0);
+
+                    //document.Add(tbtDescIndicadores);
+
+                    int fontSizeBultos = 50;
+                    var vAlignBultos = VerticalAlignment.TOP;
+                    if (r.bultosXD.Bultos.Length >= 4)
+                    {
+                        fontSizeBultos = 40;
+                        vAlignBultos = VerticalAlignment.MIDDLE;
+                    }
+
+                    Table tbIndicadores = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
+                    tbIndicadores.AddCell(new Cell().Add(new Paragraph("123456").SetVerticalAlignment(vAlignBultos).SetFontSize(30).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxHeight(100).SetMaxWidth(50).SetBorder(Border.NO_BORDER));
+                    tbIndicadores.AddCell(new Cell().Add(new Paragraph("01/44").SetVerticalAlignment(vAlignBultos).SetFontSize(fontSizeBultos).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxWidth(50).SetMaxHeight(100).SetBorder(Border.NO_BORDER));
+                    tbIndicadores.SetWidth(UnitValue.CreatePercentValue(100));
+                    tbIndicadores.SetMargins(-10, 0, 0, 0);
+
+                    document.Add(tbIndicadores);
+
+                    //Table tbContenido = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
+                    //tbContenido.AddCell(new Cell().Add(new Paragraph(r.bultosXD.Destino_razon_soc).SetMultipliedLeading(1).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER).SetMaxWidth(50).SetMinHeight(30).SetMaxHeight(30));
+                    //tbContenido.AddCell(new Cell().Add(new Paragraph("Sin verificar contenido").SetVerticalAlignment(VerticalAlignment.MIDDLE).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER)).SetMinHeight(30).SetMaxWidth(50).SetMaxHeight(30).SetBorder(Border.NO_BORDER));
+                    //tbContenido.SetWidth(UnitValue.CreatePercentValue(100));
+                    //tbContenido.SetMargins(-20, 0, 0, 6);
+
+                    //document.Add(tbContenido);
+
+                    Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 60, 60 }));
+
+                    tbFooter.AddCell(new Cell().Add(new Paragraph("Intento: 1").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
+                                                        .Add(new Paragraph("Parcel ID: X1234").SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                        .Add(new Paragraph("Fecha Viaje: 10/07/2023 10:00 AM").SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(200))
+                                                        //.Add(new Paragraph(r.bultosXD.Mail).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                        //.Add(new Paragraph(r.bultosXD.Url).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                        .SetBorder(Border.NO_BORDER))
+                                    .SetMinHeight(35).SetMaxHeight(60);
+                    //tablaEncabezado.AddCell(new Cell().Add(new iText.Layout.Element.Image(logo).SetAutoScale(true).SetPadding(0).SetMargins(2, 5, 0, 0).SetHorizontalAlignment(HorizontalAlignment.RIGHT)).SetBorder(Border.NO_BORDER)
+                    //    .Add(new Paragraph(r.bultosXD.Tipo_servicio).SetMultipliedLeading(1).SetMarginTop(9).SetFontSize(9).SetTextAlignment(TextAlignment.CENTER).SetMinHeight(20).SetMaxHeight(20).SetMaxWidth(160)))
+                    //    .SetMinHeight(75).SetMaxHeight(75);
+                    tbFooter.SetWidth(UnitValue.CreatePercentValue(100));
+                    tbFooter.SetHeight(UnitValue.CreatePercentValue(100));
+                    tbFooter.SetMargins(6, 1, 0, 6);
+
+                    document.Add(tbFooter);
+
 
                 }
             }
