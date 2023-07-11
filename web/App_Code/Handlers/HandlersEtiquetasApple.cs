@@ -272,18 +272,18 @@ public class HandlersEtiquetasApple
                 //}
 
                 Table tbIndicadores = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
-                tbIndicadores.AddCell(new Cell().Add(new Paragraph(etiqueta.Nro_Viaje).SetVerticalAlignment(vAlignBultos).SetFontSize(30).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxHeight(100).SetMaxWidth(50).SetBorder(Border.NO_BORDER));
-                tbIndicadores.AddCell(new Cell().Add(new Paragraph(String.Format("{0}/{1}", etiqueta.Parada, etiqueta.CantParadasTotales)).SetVerticalAlignment(vAlignBultos).SetFontSize(fontSizeBultos).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxWidth(50).SetMaxHeight(100).SetBorder(Border.NO_BORDER));
+                tbIndicadores.AddCell(new Cell().Add(new Paragraph(etiqueta.Nro_Viaje.PadLeft(6, '0')).SetVerticalAlignment(vAlignBultos).SetFontSize(30).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxHeight(100).SetMaxWidth(50).SetBorder(Border.NO_BORDER));
+                tbIndicadores.AddCell(new Cell().Add(new Paragraph(String.Format("{0}/{1}", etiqueta.Parada.PadLeft(2,'0'), etiqueta.CantParadasTotales.PadLeft(2, '0'))).SetVerticalAlignment(vAlignBultos).SetFontSize(fontSizeBultos).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxWidth(50).SetMaxHeight(100).SetBorder(Border.NO_BORDER));
                 tbIndicadores.SetWidth(UnitValue.CreatePercentValue(100));
                 tbIndicadores.SetMargins(-10, 0, 0, 0);
 
                 document.Add(tbIndicadores);
 
-                Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 60, 60 }));
+                Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 120, 60 }));
 
                 tbFooter.AddCell(new Cell().Add(new Paragraph(String.Format("Intento: {0}", etiqueta.NroReintento)).SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
-                                                    .Add(new Paragraph(String.Format("Parcel ID: {0}", etiqueta.ParcelId)).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
-                                                    .Add(new Paragraph(String.Format("Fecha Viaje: {0}", etiqueta.FechaViaje)).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(200))
+                                                    .Add(new Paragraph(String.Format("Parcel ID: {0}", etiqueta.ParcelId.PadLeft(5, '0'))).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                    .Add(new Paragraph(String.Format("Fecha Viaje: {0}", etiqueta.FechaViaje)).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(800))
                                                     .SetBorder(Border.NO_BORDER))
                                 .SetMinHeight(35).SetMaxHeight(60);
 

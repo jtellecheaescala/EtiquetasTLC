@@ -167,22 +167,21 @@ public class WSEtiquetas : WebService
                     msgError += "El campo nroViaje es obligatorio. ";
                 }
 
-                if (format.ToUpper() != "PDF")
+                if (String.IsNullOrEmpty(IDRemito) && String.IsNullOrEmpty(idPallet))
                 {
-                    msgError += "El template BultosXD solo admite el formato 'PDF'";
+                    msgError += "Debe indicarse el campo IdREmito o IdPallet";
                 }
 
-                if (size.ToUpper() == "A4")
+                if (format.ToUpper() != "PDF")
                 {
-                    if (msgError == null)
-                    {
-                        msgError += "El template BultosXD solo admite size 'Zebra'";
-                    }
-                    else
-                    {
-                        msgError += "; Solo se admite size 'Zebra'";
-                    }
+                    msgError += "El template solo admite el formato 'PDF'";
                 }
+                if (size.ToUpper() != "ZEBRA")
+                {
+                    msgError += "El template solo admite tamaño Zebra";
+                }
+         
+    
                 if (separarPorDocumento != 0 && separarPorDocumento != 1)
                 {
                     if (msgError == null)
