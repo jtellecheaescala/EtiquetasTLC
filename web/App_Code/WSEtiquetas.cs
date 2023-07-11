@@ -50,7 +50,7 @@ public class WSEtiquetas : WebService
     internal static int timeOutQueries = 30;    //default 30 seg
 
     [WebMethod]
-    public Response EtiquetasWS(string user, string password, string IDRemito, string cliente, string format, string size, int separarPorDocumento, string template, string nroOperacion, string nroViaje)
+    public Response EtiquetasWS(string user, string password, string IDRemito, string cliente, string format, string size, int separarPorDocumento, string template, string nroOperacion, string nroViaje, string idPallet)
     {
         Response response = new Response();
         if (connDB.State == ConnectionState.Closed) connDB.Open();
@@ -107,7 +107,7 @@ public class WSEtiquetas : WebService
             }
 
             //Validaciones para el template BultosXD
-            if(template.ToUpper() == TEMPLATE_BULTOSXD || template.ToUpper() == TEMPLATE_BULTOS_DHL_APPLE || template.ToUpper() == TEMPLATE_VIAJES_DHL_Apple)
+            if(template.ToUpper() == TEMPLATE_BULTOSXD)
             {
                 #region Generacion de mensaje de error
                 string msgError = null;
@@ -142,6 +142,61 @@ public class WSEtiquetas : WebService
                 #endregion
 
                 if(msgError != null)
+                {
+                    log.GrabarLogs(connLog, severidades.MsgUsuarios1, "ERROR", "El Modo de grabación debe ser URL o BASE64");
+
+                    sendMail.SendMailLogs();
+
+                    if (connDB.State == ConnectionState.Open) connDB.Close();
+                    if (connLog.State == ConnectionState.Open) connLog.Close();
+                    response.message = msgError;
+                    return response;
+                }
+            }
+            if (template.ToUpper() == TEMPLATE_BULTOS_DHL_APPLE || template.ToUpper() == TEMPLATE_VIAJES_DHL_Apple)
+            {
+                #region Generacion de mensaje de error
+                string msgError = null;
+
+                if (String.IsNullOrEmpty(nroOperacion))
+                {
+                    msgError += "El campo nroOperacion es obligatorio. ";
+                }
+                if (String.IsNullOrEmpty(nroViaje))
+                {
+                    msgError += "El campo nroViaje es obligatorio. ";
+                }
+
+                if (format.ToUpper() != "PDF")
+                {
+                    msgError += "El template BultosXD solo admite el formato 'PDF'";
+                }
+
+                if (size.ToUpper() == "A4")
+                {
+                    if (msgError == null)
+                    {
+                        msgError += "El template BultosXD solo admite size 'Zebra'";
+                    }
+                    else
+                    {
+                        msgError += "; Solo se admite size 'Zebra'";
+                    }
+                }
+                if (separarPorDocumento != 0 && separarPorDocumento != 1)
+                {
+                    if (msgError == null)
+                    {
+                        msgError += "Los valores posibles para SepararPorDocumento son '0' o '1'";
+                    }
+                    else
+                    {
+                        msgError += "; Los valores posibles para SepararPorDocumento son '0' o '1'";
+                    }
+                }
+                #endregion
+
+                if (msgError != null)
                 {
                     log.GrabarLogs(connLog, severidades.MsgUsuarios1, "ERROR", "El Modo de grabación debe ser URL o BASE64");
 
@@ -406,7 +461,8 @@ public class WSEtiquetas : WebService
                 else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
                 {
                     string message;
-                    remitos = new RepositorioEtiquetasApple().ObtenerRemitosBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente, out message);
+                    //TODO: Agregar validacion de que tienen que venir los campos obligatorios.
+                    remitos = new RepositorioEtiquetasApple().ObtenerRemitosBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente,nroOperacion,nroViaje, idPallet, out message);
 
                     if(remitos.Count() == 0)
                     {
@@ -418,7 +474,7 @@ public class WSEtiquetas : WebService
                 else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
                 {
                     string message;
-                    remitos = new RepositorioEtiquetasApple().ObtenerRemitosBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente, out message);
+                    remitos = new RepositorioEtiquetasApple().ObtenerRemitosBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente,nroOperacion,nroViaje,idPallet, out message);
 
                     if (remitos.Count() == 0)
                     {

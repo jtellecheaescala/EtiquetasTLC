@@ -14,7 +14,7 @@ public class RepositorioEtiquetasApple
 {
     private QueriesSQL queriesSQL = new QueriesSQL();
 
-    public List<Remito> ObtenerRemitosBultosDHLApple(SqlConnection connDB, Log log, SqlConnection connLog, Globals.staticValues.SeveridadesClass severidades, int timeOutQueries, string sIDRemito, string cliente, out string message)
+    public List<Remito> ObtenerRemitosBultosDHLApple(SqlConnection connDB, Log log, SqlConnection connLog, Globals.staticValues.SeveridadesClass severidades, int timeOutQueries, string sIDRemito, string cliente, string nroOperacion, string nroViaje, string idPallet, out string message)
     {
         List<Remito> remitos = new List<Remito>();
         string cantidadTotal = string.Empty;
