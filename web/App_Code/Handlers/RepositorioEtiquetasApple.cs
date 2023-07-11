@@ -14,52 +14,26 @@ public class RepositorioEtiquetasApple
 {
     private QueriesSQL queriesSQL = new QueriesSQL();
 
-    public List<Remito> ObtenerRemitosBultosDHLApple(SqlConnection connDB, Log log, SqlConnection connLog, Globals.staticValues.SeveridadesClass severidades, int timeOutQueries, string sIDRemito, string cliente, string nroOperacion, string nroViaje, string idPallet, out string message)
+    public List<EtiquetaBultoDHLApple> ObtenerDatosEtiquetasBultosDHLApple(SqlConnection connDB, Log log, SqlConnection connLog, Globals.staticValues.SeveridadesClass severidades, int timeOutQueries, string sIDRemito, string cliente, string nroOperacion, string nroViaje, string idPallet, out string message)
     {
-        List<Remito> remitos = new List<Remito>();
+        List<EtiquetaBultoDHLApple> lstEtiquetas = new List<EtiquetaBultoDHLApple>();
         string cantidadTotal = string.Empty;
         message = String.Empty;
         int etiquetasCount = 0;
 
-        using (SqlDataReader readerCantidad = new SqlCommand
-        {
-            Connection = connDB,
-            CommandType = CommandType.Text,
-            CommandTimeout = timeOutQueries,
-            CommandText = queriesSQL.cant_BultosXD,
-            Parameters =
-                        {
-                            new SqlParameter { ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
-                        }
-        }.ExecuteReader())
-        {
-            if (readerCantidad.HasRows)
-            {
-                while (readerCantidad.Read())
-                {
-                    cantidadTotal = StringHelper.LimpiarCampo(readerCantidad["Cantidad"]);
-                }
-            }
-            else
-            {
-                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente);
-                if (connDB.State == ConnectionState.Open) connDB.Close();
-                if (connLog.State == ConnectionState.Open) connLog.Close();
-                message = "ERROR: Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente;
-                return remitos;
-            }
-        }
 
         using (SqlDataReader readerData = new SqlCommand
         {
             Connection = connDB,
             CommandType = CommandType.Text,
             CommandTimeout = timeOutQueries,
-            CommandText = queriesSQL.sRemitosBultosXD,
+            CommandText = queriesSQL.remitosBultosDHLApple,
             Parameters =
                         {
-                            new SqlParameter {ParameterName = "@CodCliente", SqlDbType = SqlDbType.Int, Value = int.Parse(cliente)},
-                            new SqlParameter {ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
+                            new SqlParameter {ParameterName = "@NroViaje", SqlDbType = SqlDbType.Int, Value = int.Parse(nroViaje)},
+                            new SqlParameter {ParameterName = "@NroOperacion", SqlDbType = SqlDbType.Int, Value = int.Parse(nroOperacion)},
+                            new SqlParameter {ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)},
+                            new SqlParameter {ParameterName = "@IdPallet", SqlDbType = SqlDbType.Int, Value =  int.Parse(idPallet)}
                         }
         }.ExecuteReader())
         {
@@ -69,25 +43,27 @@ public class RepositorioEtiquetasApple
                 {
                     etiquetasCount++;
 
-                    BultosXD nBultoXD = new BultosXD();
+                    EtiquetaBultoDHLApple etiqueta = new EtiquetaBultoDHLApple();
 
-                    nBultoXD.Origen = StringHelper.LimpiarCampo(readerData["Origen"]);
-                    nBultoXD.Domicilio = StringHelper.LimpiarCampo(readerData["Domicilio"]);
-                    nBultoXD.Localidad = StringHelper.LimpiarCampo(readerData["Localidad"]);
-                    nBultoXD.Mail = StringHelper.LimpiarCampo(readerData["Mail"]);
-                    nBultoXD.Url = StringHelper.LimpiarCampo(readerData["Url"]);
-                    nBultoXD.Nro_seguimiento = StringHelper.LimpiarCampo(readerData["Nro_seguimiento"]);
-                    nBultoXD.Fecha = StringHelper.LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
-                    nBultoXD.Destino_cod = StringHelper.LimpiarCampo(readerData["Destino_cod"]);
-                    nBultoXD.Bultos = StringHelper.LimpiarCampo(readerData["Bultos"]);
-                    nBultoXD.Destino_razon_soc = StringHelper.LimpiarCampo(readerData["Destino_razon_soc"]);
-                    nBultoXD.Tipo_servicio = StringHelper.LimpiarCampo(readerData["Tipo_servicio"]);
-                    nBultoXD.Cantidad_etiquetas = Convert.ToInt32(cantidadTotal);
+                    etiqueta.Nro_Viaje = StringHelper.LimpiarCampo(readerData["Nro_Viaje"]);
+                    etiqueta.Cod_cliente = StringHelper.LimpiarCampo(readerData["Cod_cliente"]);
+                    etiqueta.Nro_Operacion = StringHelper.LimpiarCampo(readerData["Nro_Operacion"]);
+                    etiqueta.ID_Remito = StringHelper.LimpiarCampo(readerData["ID_Remito"]);
+                    etiqueta.Bultos = StringHelper.LimpiarCampo(readerData["Bultos"]);
+                    etiqueta.ParcelId = StringHelper.LimpiarCampo(readerData["ParcelId"]);
+                    etiqueta.Parada = StringHelper.LimpiarCampo(readerData["Parada"]);
+                    etiqueta.CantParadasTotales = StringHelper.LimpiarCampo(readerData["CantParadasTotales"]);
+                    etiqueta.FechaViaje = StringHelper.LimpiarCampo(readerData["FechaViaje"]);
+                    etiqueta.NroReintento = StringHelper.LimpiarCampo(readerData["NroReintento"]);
 
-                    remitos.Add(new Remito(int.Parse(sIDRemito), nBultoXD));
+                    lstEtiquetas.Add(etiqueta);
                 }
             }
+            else
+            {
+                message = String.Format("No se encontraron bultos para las etiquetas para los datos Viaje: {0}, Nro Operacion {1}, Id Remito {2}, IdPallet: {3}",nroViaje, nroOperacion, sIDRemito, idPallet);
+            }
         }
-        return remitos;
+        return lstEtiquetas;
     }
 }

@@ -290,6 +290,7 @@ public class WSEtiquetas : WebService
             int etiquetasCount = 0;
             bool vertical = false;
             List<Remito> remitos = new List<Remito>();
+            List<EtiquetaBultoDHLApple> etiquedasBultosDHL = new List<EtiquetaBultoDHLApple>();
             string[] RemitosIDS = IDRemito.Split('|');
             foreach (string sIDRemito in RemitosIDS)
             {
@@ -461,10 +462,10 @@ public class WSEtiquetas : WebService
                 else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
                 {
                     string message;
-                    //TODO: Agregar validacion de que tienen que venir los campos obligatorios.
-                    remitos = new RepositorioEtiquetasApple().ObtenerRemitosBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente,nroOperacion,nroViaje, idPallet, out message);
 
-                    if(remitos.Count() == 0)
+                    etiquedasBultosDHL = new RepositorioEtiquetasApple().ObtenerDatosEtiquetasBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente,nroOperacion,nroViaje, idPallet, out message);
+
+                    if(etiquedasBultosDHL.Count() == 0)
                     {
                         response.message = message;
                         return response;
@@ -474,7 +475,7 @@ public class WSEtiquetas : WebService
                 else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
                 {
                     string message;
-                    remitos = new RepositorioEtiquetasApple().ObtenerRemitosBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente,nroOperacion,nroViaje,idPallet, out message);
+                    etiquedasBultosDHL = new RepositorioEtiquetasApple().ObtenerDatosEtiquetasBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente,nroOperacion,nroViaje,idPallet, out message);
 
                     if (remitos.Count() == 0)
                     {
@@ -575,7 +576,7 @@ public class WSEtiquetas : WebService
                 }
                 else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
                 {
-                    var archivo = new HandlersEtiquetasApple(log, connLog, severidades, MODO_OBTENCION_ARCHIVO, gvalues, size, TEMPLATE_BULTOS_DHL_APPLE).GenerarPDFBultosDHLApple(remitos, size.ToLower(), format);
+                    var archivo = new HandlersEtiquetasApple(log, connLog, severidades, MODO_OBTENCION_ARCHIVO, gvalues, size, TEMPLATE_BULTOS_DHL_APPLE).GenerarPDFBultosDHLApple(etiquedasBultosDHL, size.ToLower(), format);
                     response.message = "Etiquetas generadas con exito";
                     response.Archivos.Add(archivo);
                 }

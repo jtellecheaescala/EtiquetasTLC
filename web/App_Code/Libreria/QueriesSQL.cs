@@ -161,7 +161,71 @@ namespace Tecnologistica
                                                     left join Tipos_Servicio ts with(nolock) on r.cod_tipo_servicio = ts.cod_tipo_servicio 
                                                     where r.Cod_cliente=@CodCliente and r.id_remito=@IdRemito";
 
+        internal readonly string remitosBultosDHLApple = @"SELECT DISTINCT VI.Nro_Viaje AS 'Nro_Viaje'
+                                            			          , RE.Cod_cliente AS 'Cod_cliente'
+                                            			          , VI.Nro_Operacion AS 'Nro_Operacion'
+                                            			          , RE.ID_Remito AS 'ID_Remito'
+                                            			          , RE.Bultos AS 'Bultos'
+                                            			          , RB.ID_Pallet AS 'ParcelId'
+                                            			          , -- Se debe imprimir una etiqueta por cada Id_Pallet
+                                            				          PA.Orden_Entrega AS 'Parada'
+                                            			          , GR.CantParadasTotales AS 'CantParadasTotales'
+                                            			          , DV.Fecha_Hora_Ruteo AS 'FechaViaje'
+                                            			          , [dbo].[FN_NRO_INTENTO_REMITO]( @IdRemito, @NroOperacion, @NroViaje ) AS 'NroReintento'
+                                                          FROM Remitos RE WITH (NOLOCK)
+                                                          JOIN Remitos_Viaje RV WITH (NOLOCK)
+                                                          	       ON RV.ID_Remito = RE.ID_Remito
+                                                          JOIN (SELECT DISTINCT ID_Remito
+                                                          					, ID_Pallet
+                                                          FROM Remitos_Bultos rb1 WITH (NOLOCK)) RB
+                                                          	ON RB.ID_Remito = RE.ID_Remito
+                                                          JOIN Viajes VI WITH (NOLOCK)
+                                                          	ON VI.Nro_Viaje = RV.Nro_Viaje
+                                                          		AND VI.Nro_Operacion = RV.Nro_Operacion
+                                                          JOIN Datos_del_Viaje DV WITH (NOLOCK)
+                                                          	ON DV.Nro_Viaje = VI.Nro_Viaje
+                                                          		AND VI.Nro_Operacion = DV.Nro_Operacion
+                                                          JOIN Paradas PA WITH (NOLOCK)
+                                                          	ON PA.Nro_Viaje = VI.Nro_Viaje
+                                                          		AND PA.Nro_Operacion = VI.Nro_Operacion
+                                                          		AND RV.ID_Parada = PA.ID_Parada
+                                                          
+                                                          JOIN (SELECT Nro_Viaje
+                                                          		   , Nro_Operacion
+                                                          		   , MAX( Orden_Entrega ) AS CantParadasTotales
+                                                          	    FROM Paradas WITH (NOLOCK)
+                                                          	    GROUP BY Nro_Viaje
+                                                          		   , Nro_Operacion) GR
+                                                          	ON GR.Nro_Viaje = PA.Nro_Viaje
+                                                          		AND GR.Nro_Operacion = PA.Nro_Operacion
 
+                                                          WHERE VI.Nro_Viaje = @NroViaje
+                                                          	AND VI.Nro_Operacion = @NroOperacion
+                                                          	AND RE.ID_Remito = @IdRemito
+                                                            AND rb.ID_Pallet = @IdPallet";
+
+        internal readonly string viajesDHLApple = @"
+                                                    SELECT VI.Nro_Operacion AS 'Nro_Operacion'
+                                                    	 , VI.Nro_Viaje AS 'Nro_Viaje'
+                                                    	 , COUNT( DISTINCT RB.ID_Pallet ) AS 'CantBultos'
+                                                    	 , COUNT( DISTINCT RV.ID_Remito ) AS 'CantOrdenes'
+                                                    	 , MAX( DV.Fecha_Hora_Ruteo ) AS 'FechaRuteo'
+                                                    	 , COALESCE( MAX( VI.Fecha_Hora_Salida ), MAX( DV.Fecha_Hora_Presentacion ) ) AS 'FechaEstimadaSalida'
+                                                    FROM Remitos RE WITH (NOLOCK)
+                                                    JOIN Remitos_Viaje RV WITH (NOLOCK)
+                                                    	ON RV.ID_Remito = RE.ID_Remito
+                                                    JOIN Viajes VI WITH (NOLOCK)
+                                                    	ON VI.Nro_Viaje = RV.Nro_Viaje
+                                                    		AND VI.Nro_Operacion = RV.Nro_Operacion
+                                                    JOIN Datos_del_Viaje DV WITH (NOLOCK)
+                                                    	ON DV.Nro_Viaje = VI.Nro_Viaje
+                                                    		AND VI.Nro_Operacion = DV.Nro_Operacion
+                                                    JOIN Remitos_Bultos RB WITH (NOLOCK)
+                                                    	ON RE.ID_Remito = RB.ID_Remito
+                                                    WHERE VI.Nro_Viaje = @NroViaje
+                                                    	AND VI.Nro_Operacion = @NroOperacion
+                                                    GROUP BY VI.Nro_Viaje
+                                                    	   , VI.Nro_Operacion";
 
     }
 }
