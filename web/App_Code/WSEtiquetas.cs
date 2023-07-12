@@ -167,9 +167,9 @@ public class WSEtiquetas : WebService
                     msgError += "El campo nroViaje es obligatorio. ";
                 }
 
-                if (String.IsNullOrEmpty(IDRemito) && String.IsNullOrEmpty(idPallet))
+                if (String.IsNullOrEmpty(IDRemito))
                 {
-                    msgError += "Debe indicarse el campo IdREmito o IdPallet";
+                    msgError += "Debe indicarse el campo IdREmito";
                 }
 
                 if (format.ToUpper() != "PDF")

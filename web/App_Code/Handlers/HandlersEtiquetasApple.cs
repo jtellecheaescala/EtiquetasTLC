@@ -246,44 +246,41 @@ public class HandlersEtiquetasApple
 
                 log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas para IDRemito: " + etiqueta.ID_Remito + " - Tamaño: " + size + " - Formato: " + format);
 
-                Table tablaEncabezado = new Table(UnitValue.CreatePercentArray(new float[] { 60, 40 }));
+                Table tbHeader = new Table(UnitValue.CreatePercentArray(new float[] { 60, 40 }));
 
-                tablaEncabezado.AddCell(new Cell().Add(new Paragraph("Viaje:").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
+                tbHeader.AddCell(new Cell().Add(new Paragraph("Viaje:").SetFontSize(13).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(15).SetMaxHeight(40).SetMaxWidth(400))
                                                     .SetBorder(Border.NO_BORDER))
                                 .SetMinHeight(35).SetMaxHeight(35);
 
-                tablaEncabezado.AddCell(new Cell().Add(new Paragraph("Parada:").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
+                tbHeader.AddCell(new Cell().Add(new Paragraph("Parada:").SetFontSize(13).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(15).SetMaxHeight(40).SetMaxWidth(400).SetMarginLeft(-25))
 
                                          .SetBorder(Border.NO_BORDER))
                      .SetMinHeight(35).SetMaxHeight(35);
 
-                tablaEncabezado.SetWidth(UnitValue.CreatePercentValue(100));
-                tablaEncabezado.SetHeight(UnitValue.CreatePercentValue(100));
-                tablaEncabezado.SetMargins(6, 1, 0, 6);
+                tbHeader.SetWidth(UnitValue.CreatePercentValue(100));
+                tbHeader.SetHeight(UnitValue.CreatePercentValue(100));
+                tbHeader.SetMargins(6, 1, 0, 6);
 
-                document.Add(tablaEncabezado);
+                document.Add(tbHeader);
 
-                int fontSizeBultos = 50;
+                int fontSizeParadas = 50;
                 var vAlignBultos = VerticalAlignment.TOP;
-                //if (etiqurta.bultosXD.Bultos.Length >= 4)
-                //{
-                //    fontSizeBultos = 40;
-                //    vAlignBultos = VerticalAlignment.MIDDLE;
-                //}
 
-                Table tbIndicadores = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
-                tbIndicadores.AddCell(new Cell().Add(new Paragraph(etiqueta.Nro_Viaje.PadLeft(6, '0')).SetVerticalAlignment(vAlignBultos).SetFontSize(30).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxHeight(100).SetMaxWidth(50).SetBorder(Border.NO_BORDER));
-                tbIndicadores.AddCell(new Cell().Add(new Paragraph(String.Format("{0}/{1}", etiqueta.Parada.PadLeft(2,'0'), etiqueta.CantParadasTotales.PadLeft(2, '0'))).SetVerticalAlignment(vAlignBultos).SetFontSize(fontSizeBultos).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxWidth(50).SetMaxHeight(100).SetBorder(Border.NO_BORDER));
-                tbIndicadores.SetWidth(UnitValue.CreatePercentValue(100));
-                tbIndicadores.SetMargins(-10, 0, 0, 0);
+                Table tbBody = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
+                tbBody.AddCell(new Cell().Add(new Paragraph(etiqueta.Nro_Viaje.PadLeft(6, '0')).SetVerticalAlignment(vAlignBultos).SetFontSize(30).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxHeight(100).SetMaxWidth(50).SetBorder(Border.NO_BORDER));
+                tbBody.AddCell(new Cell().Add(new Paragraph(String.Format("{0}/{1}", etiqueta.Parada.PadLeft(2, '0'), etiqueta.CantParadasTotales.PadLeft(2, '0'))).SetVerticalAlignment(vAlignBultos).SetFontSize(fontSizeParadas).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxWidth(50).SetMaxHeight(100).SetBorder(Border.NO_BORDER));
+                tbBody.SetWidth(UnitValue.CreatePercentValue(100));
+                tbBody.SetMargins(6, 1, 0, 6);
 
-                document.Add(tbIndicadores);
+                document.Add(tbBody);
 
-                Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 120, 60 }));
+                int fontSizeFooter = 14;
 
-                tbFooter.AddCell(new Cell().Add(new Paragraph(String.Format("Intento: {0}", etiqueta.NroReintento)).SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
-                                                    .Add(new Paragraph(String.Format("Parcel ID: {0}", etiqueta.ParcelId.PadLeft(5, '0'))).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
-                                                    .Add(new Paragraph(String.Format("Fecha Viaje: {0}", etiqueta.FechaViaje)).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(800))
+                Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 300, 60 }));
+
+                tbFooter.AddCell(new Cell().Add(new Paragraph(String.Format("Intento: {0}", etiqueta.NroReintento)).SetFontSize(fontSizeFooter).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(15).SetMaxHeight(500).SetMaxWidth(800))
+                                                    .Add(new Paragraph(String.Format("Parcel ID: {0}", etiqueta.ParcelId.PadLeft(10, '0'))).SetMultipliedLeading(1).SetFontSize(fontSizeFooter).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(12).SetMaxHeight(500).SetMaxWidth(800))
+                                                    .Add(new Paragraph(String.Format("Fecha Viaje: {0}", etiqueta.FechaViaje)).SetMultipliedLeading(1).SetFontSize(fontSizeFooter).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(500).SetMaxWidth(3000))
                                                     .SetBorder(Border.NO_BORDER))
                                 .SetMinHeight(35).SetMaxHeight(60);
 
