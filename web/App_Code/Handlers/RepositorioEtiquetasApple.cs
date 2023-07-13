@@ -33,7 +33,7 @@ public class RepositorioEtiquetasApple
                             new SqlParameter {ParameterName = "@NroViaje", SqlDbType = SqlDbType.Int, Value = int.Parse(nroViaje)},
                             new SqlParameter {ParameterName = "@NroOperacion", SqlDbType = SqlDbType.Int, Value = int.Parse(nroOperacion)},
                             new SqlParameter {ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)},
-                            new SqlParameter {ParameterName = "@IdPallet", SqlDbType = SqlDbType.Int, Value =  String.IsNullOrEmpty(idPallet) ? DBNull.Value : (object) int.Parse(idPallet)}
+                            new SqlParameter {ParameterName = "@IdPallet", SqlDbType = SqlDbType.Int, Value =  String.IsNullOrEmpty(idPallet) ? DBNull.Value : (object) idPallet}
                         }
         }.ExecuteReader())
         {
@@ -80,7 +80,7 @@ public class RepositorioEtiquetasApple
             Connection = connDB,
             CommandType = CommandType.Text,
             CommandTimeout = timeOutQueries,
-            CommandText = queriesSQL.remitosBultosDHLApple,
+            CommandText = queriesSQL.viajesDHLApple,
             Parameters =
                         {
                             new SqlParameter {ParameterName = "@NroViaje", SqlDbType = SqlDbType.Int, Value = int.Parse(nroViaje)},
