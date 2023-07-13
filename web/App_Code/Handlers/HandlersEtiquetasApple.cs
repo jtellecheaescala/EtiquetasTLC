@@ -54,7 +54,10 @@ public class HandlersEtiquetasApple
     {
         try
         {
+
+
             ruta = String.Format(@"{0}\{1}_{2}.pdf", gvalues.PathOut, etiqueta, DateTime.Now.ToString("yyyyMMdd-HHmmssffff"));
+            log.GrabarLogs(connLog, severidades.MsgSoporte1, "INFO", String.Format("Inicializando handler etiquetas BULTOS_DHL_APPLE. Generando ruta: {0}", ruta));
 
             writer = new PdfWriter(ruta);
             pdf = new PdfDocument(writer);
@@ -76,11 +79,12 @@ public class HandlersEtiquetasApple
                 Directory.CreateDirectory(gvalues.PathOut);
             }
 
-            logo = ImageDataFactory.Create(gvalues.PathLogo);
+            //logo = ImageDataFactory.Create(gvalues.PathLogo);
         }
         catch (Exception ex)
         {
-            log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", String.Format("Error al inicializar handler etiquetas Apple: {0}", ex.Message));
+            log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", String.Format("Error al inicializar handler etiquetas Apple: {0}, Detalle: {1}", ex.Message, ex.StackTrace));
+
             throw ex;
         }
     }
