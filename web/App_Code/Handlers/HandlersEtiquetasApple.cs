@@ -65,7 +65,7 @@ public class HandlersEtiquetasApple
             }
             else
             {
-                pageSize = new PageSize(285, 285);
+                pageSize = new PageSize(285, 220);
             }
 
             document = new Document(pdf, pageSize);
@@ -241,10 +241,7 @@ public class HandlersEtiquetasApple
         {
             foreach (var etiqueta in etiquetas)
             {
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo de barra para IDRemito: " + etiqueta.ID_Remito);
-
-
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas para IDRemito: " + etiqueta.ID_Remito + " - Tamaño: " + size + " - Formato: " + format);
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas BultosDHLApple para IDRemito: " + etiqueta.ID_Remito + " - Tamaño: " + size + " - Formato: " + format);
 
                 Table tbHeader = new Table(UnitValue.CreatePercentArray(new float[] { 60, 40 }));
 
@@ -300,23 +297,23 @@ public class HandlersEtiquetasApple
                 archivoPdf.base64 = Convert.ToBase64String(pdfEnByte);
                 archivoPdf.nombre = fileName;
 
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta PDFBultosVertical generada con exito Tamaño: " + size + " - Formato: " + format + ". Modo elegido: BASE64");
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta PDFBultosVertical BultosDHLApple generada con exito Tamaño: " + size + " - Formato: " + format + ". Modo elegido: BASE64");
             }
             else if (MODO_OBTENCION_ARCHIVO == "URL")
             {
                 string url = System.IO.Path.Combine(gvalues.RaizURL, fileName);
                 archivoPdf.url = url;
                 archivoPdf.nombre = fileName;
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta generada con exito - Tamaño: " + size + " - Formato: " + format + ". Modo elegido: URL");
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta BultosDHLApple generada con exito - Tamaño: " + size + " - Formato: " + format + ". Modo elegido: URL");
             }
 
             return archivoPdf;
         }
         catch (Exception e)
         {
-            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF" + e.Message.ToString());
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF BultosDHLApple" + e.Message.ToString());
 
-            return archivoPdf;
+            throw e;
         }
         finally
         {

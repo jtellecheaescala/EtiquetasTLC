@@ -462,12 +462,18 @@ public class WSEtiquetas : WebService
                 {
                     string message;
 
+                    log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Obteniendo datos para etiquetas BultosDHLApple, IDRemito: " + sIDRemito + " - cliente: " + cliente);
                     etiquedasBultosDHL = new RepositorioEtiquetasApple().ObtenerDatosEtiquetasBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente,nroOperacion,nroViaje, idPallet, out message);
 
-                    if(etiquedasBultosDHL.Count() == 0)
+
+                    if (etiquedasBultosDHL.Count() == 0)
                     {
+                        log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron datos para etiquetas BultosDHLApple para IDRemito: " + sIDRemito + " - cliente: " + cliente);
                         response.message = message;
                         return response;
+                    }else
+                    {
+                        log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Se encontraron : " + etiquedasBultosDHL.Count() + " etiquetas BultosDHLApple para el remito: " + sIDRemito + " - cliente: " + cliente);
                     }
                  
                 }
@@ -545,8 +551,14 @@ public class WSEtiquetas : WebService
                     }
                 }
             }
-            System.Drawing.Image etiquetaImg = obtenerTemplate(template, vertical);
-            System.Drawing.Image logoImg = obtenerLogo(etiquetaImg, vertical);
+            System.Drawing.Image etiquetaImg = null;
+            System.Drawing.Image logoImg = null;
+
+            if (!string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
+            {
+                etiquetaImg = obtenerTemplate(template, vertical);
+                logoImg = obtenerLogo(etiquetaImg, vertical);
+            }
             #endregion
 
             log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Hay " + etiquetasCount.ToString() + " etiquetas a procesar del IDRemito: " + IDRemito);
@@ -1089,7 +1101,7 @@ public class WSEtiquetas : WebService
 
             foreach (var r in remitos)
             {
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo de barra para IDRemito: " + r.ID_Remito);
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "NotifAicacion", "Generando codigo de barra para IDRemito: " + r.ID_Remito);
 
                 #region Generacion de codigo de barras
                 System.Drawing.Image barcode1 = null;
