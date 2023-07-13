@@ -67,7 +67,8 @@ public class HandlersEtiquetasApple
                 pageSize = PageSize.A4;
             }
             else
-            {
+            { // new PageSize(285, 220): representa: 100,5 x 77,6
+              // new PageSize(170, 85):  representa: a 60 x 30 
                 pageSize = new PageSize(285, 220);
             }
 
