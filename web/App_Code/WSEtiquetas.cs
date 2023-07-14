@@ -153,7 +153,7 @@ public class WSEtiquetas : WebService
                     return response;
                 }
             }
-            if (template.ToUpper() == TEMPLATE_BULTOS_DHL_APPLE || template.ToUpper() == TEMPLATE_VIAJES_DHL_Apple)
+            if (template.ToUpper() == TEMPLATE_BULTOS_DHL_APPLE)
             {
                 #region Generacion de mensaje de error
                 string msgError = null;
@@ -182,6 +182,53 @@ public class WSEtiquetas : WebService
                 }
          
     
+                if (separarPorDocumento != 0 && separarPorDocumento != 1)
+                {
+                    if (msgError == null)
+                    {
+                        msgError += "Los valores posibles para SepararPorDocumento son '0' o '1'";
+                    }
+                    else
+                    {
+                        msgError += "; Los valores posibles para SepararPorDocumento son '0' o '1'";
+                    }
+                }
+                #endregion
+
+                if (msgError != null)
+                {
+                    log.GrabarLogs(connLog, severidades.MsgUsuarios1, "ERROR", "El Modo de grabación debe ser URL o BASE64");
+
+                    sendMail.SendMailLogs();
+
+                    if (connDB.State == ConnectionState.Open) connDB.Close();
+                    if (connLog.State == ConnectionState.Open) connLog.Close();
+                    response.message = msgError;
+                    return response;
+                }
+            }else if (template.ToUpper() == TEMPLATE_VIAJES_DHL_Apple)
+            {
+                #region Generacion de mensaje de error
+                string msgError = null;
+
+                if (String.IsNullOrEmpty(nroOperacion))
+                {
+                    msgError += "El campo nroOperacion es obligatorio. ";
+                }
+                if (String.IsNullOrEmpty(nroViaje))
+                {
+                    msgError += "El campo nroViaje es obligatorio. ";
+                }
+
+                if (format.ToUpper() != "PDF")
+                {
+                    msgError += "El template solo admite el formato 'PDF'";
+                }
+                if (size.ToUpper() != "A4")
+                {
+                    msgError += "El template solo admite tamaño A4";
+                }
+
                 if (separarPorDocumento != 0 && separarPorDocumento != 1)
                 {
                     if (msgError == null)
@@ -290,263 +337,272 @@ public class WSEtiquetas : WebService
             bool vertical = false;
             List<Remito> remitos = new List<Remito>();
             List<EtiquetaBultoDHLApple> etiquedasBultosDHL = new List<EtiquetaBultoDHLApple>();
-            string[] RemitosIDS = IDRemito.Split('|');
-            foreach (string sIDRemito in RemitosIDS)
+            EtiquetaBultoViajeDHLApple etiquetaBultoViajeDHLApple = null;
+
+
+            if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
             {
-                if (string.Equals(template.ToUpper(), TEMPLATE_VERTICAL))
+                string message;
+
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Obteniendo datos para etiquetas BultosDHLApple, IDRemito: " + IDRemito + " - cliente: " + cliente);
+                etiquedasBultosDHL = new RepositorioEtiquetasApple().ObtenerDatosEtiquetasBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, IDRemito, cliente, nroOperacion, nroViaje, idPallet, out message);
+
+
+                if (etiquedasBultosDHL.Count() == 0)
                 {
-                    vertical = true;
-                    List<BultosVertical> lBultosVertical = new List<BultosVertical>();
-                    using (SqlDataReader readerCantidad = new SqlCommand
+                    log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron datos para etiquetas BultosDHLApple para IDRemito: " + IDRemito + " - cliente: " + cliente);
+                    response.message = message;
+                    return response;
+                }
+                else
+                {
+                    log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Se encontraron : " + etiquedasBultosDHL.Count() + " etiquetas BultosDHLApple para el remito: " + IDRemito + " - cliente: " + cliente);
+                }
+
+            }
+            else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
+            {
+                string message;
+                etiquetaBultoViajeDHLApple = new RepositorioEtiquetasApple().ObtenerDatosEtiquetasViajesBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, nroOperacion, nroViaje, out message);
+
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", message);
+
+                if (etiquetaBultoViajeDHLApple == null)
+                {
+                    response.message = message;
+                    return response;
+                }
+            }
+            else
+            {
+                string[] RemitosIDS = IDRemito.Split('|');
+                foreach (string sIDRemito in RemitosIDS)
+                {
+                    if (string.Equals(template.ToUpper(), TEMPLATE_VERTICAL))
                     {
-                        Connection = connDB,
-                        CommandType = CommandType.Text,
-                        CommandTimeout = timeOutQueries,
-                        CommandText = queriesSQL.sRemitos_Bultos,
-                        Parameters =
+                        vertical = true;
+                        List<BultosVertical> lBultosVertical = new List<BultosVertical>();
+                        using (SqlDataReader readerCantidad = new SqlCommand
+                        {
+                            Connection = connDB,
+                            CommandType = CommandType.Text,
+                            CommandTimeout = timeOutQueries,
+                            CommandText = queriesSQL.sRemitos_Bultos,
+                            Parameters =
                         {
                             new SqlParameter { ParameterName = "@ID_Remito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
                         }
-                    }.ExecuteReader())
-                    {
-                        if (readerCantidad.HasRows)
+                        }.ExecuteReader())
                         {
-                            while (readerCantidad.Read())
+                            if (readerCantidad.HasRows)
                             {
-                                cantidadTotal = readerCantidad["Cantidad"].ToString().Trim();
+                                while (readerCantidad.Read())
+                                {
+                                    cantidadTotal = readerCantidad["Cantidad"].ToString().Trim();
+                                }
+                            }
+                            else
+                            {
+                                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "Error buscando cantidad en Remitos_Bultos para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                                if (connDB.State == ConnectionState.Open) connDB.Close();
+                                if (connLog.State == ConnectionState.Open) connLog.Close();
+                                response.message = "ERROR: Error buscando cantidad en Remitos_Bultos para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                                return response;
                             }
                         }
-                        else
-                        {
-                            log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "Error buscando cantidad en Remitos_Bultos para IDRemito: " + sIDRemito + " - cliente: " + cliente);
-                            if (connDB.State == ConnectionState.Open) connDB.Close();
-                            if (connLog.State == ConnectionState.Open) connLog.Close();
-                            response.message = "ERROR: Error buscando cantidad en Remitos_Bultos para IDRemito: " + sIDRemito + " - cliente: " + cliente;
-                            return response;
-                        }
-                    }
 
-                    using (SqlDataReader readerData = new SqlCommand
-                    {
-                        Connection = connDB,
-                        CommandType = CommandType.Text,
-                        CommandTimeout = timeOutQueries,
-                        CommandText = queriesSQL.sRemitosVertical,
-                        Parameters =
+                        using (SqlDataReader readerData = new SqlCommand
+                        {
+                            Connection = connDB,
+                            CommandType = CommandType.Text,
+                            CommandTimeout = timeOutQueries,
+                            CommandText = queriesSQL.sRemitosVertical,
+                            Parameters =
                         {
                             new SqlParameter {ParameterName = "@Cod_Cliente", SqlDbType = SqlDbType.Int, Value = int.Parse(cliente)},
                             new SqlParameter {ParameterName = "@Id_Remito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
                         }
-                    }.ExecuteReader())
-                    {
-                        if (readerData.HasRows)
+                        }.ExecuteReader())
                         {
-                            while (readerData.Read())
+                            if (readerData.HasRows)
                             {
-                                etiquetasCount++;
+                                while (readerData.Read())
+                                {
+                                    etiquetasCount++;
 
-                                lBultosVertical.Add(new BultosVertical(
-                                    readerData["TrackingNo"].ToString().Trim(),
-                                    readerData["Origen"].ToString().Trim(),
-                                    readerData["Origen_Ciudad"].ToString().Trim(),
-                                    readerData["Origen_Direccion"].ToString().Trim(),
-                                    readerData["Destino"].ToString().Trim(),
-                                    readerData["Destino_Ciudad"].ToString().Trim(),
-                                    readerData["Destino_Direccion"].ToString().Trim(),
-                                    readerData["Destino_Contacto"].ToString().Trim(),
-                                    readerData["Destino_Telefono"].ToString().Trim(),
-                                    readerData["Cuenta"].ToString().Trim(),
-                                    readerData["ModEnvio"].ToString().Trim(),
-                                    string.Equals(cantidadTotal, "0") ? readerData["Bultos"].ToString().Trim() : cantidadTotal,
-                                    string.Equals(cantidadTotal, "0") ? "" : Math.Round((decimal)readerData["Peso"], 2).ToString().Trim(),
-                                    readerData["IdRemito"].ToString().Trim(),
-                                    readerData["NroDcto"].ToString().Trim(),
-                                    readerData["NroPedido"].ToString().Trim(),
-                                    readerData["Conocimiento"].ToString().Trim(),
-                                    readerData["Comentario"].ToString().Trim(),
-                                    cliente
-                                    ));
+                                    lBultosVertical.Add(new BultosVertical(
+                                        readerData["TrackingNo"].ToString().Trim(),
+                                        readerData["Origen"].ToString().Trim(),
+                                        readerData["Origen_Ciudad"].ToString().Trim(),
+                                        readerData["Origen_Direccion"].ToString().Trim(),
+                                        readerData["Destino"].ToString().Trim(),
+                                        readerData["Destino_Ciudad"].ToString().Trim(),
+                                        readerData["Destino_Direccion"].ToString().Trim(),
+                                        readerData["Destino_Contacto"].ToString().Trim(),
+                                        readerData["Destino_Telefono"].ToString().Trim(),
+                                        readerData["Cuenta"].ToString().Trim(),
+                                        readerData["ModEnvio"].ToString().Trim(),
+                                        string.Equals(cantidadTotal, "0") ? readerData["Bultos"].ToString().Trim() : cantidadTotal,
+                                        string.Equals(cantidadTotal, "0") ? "" : Math.Round((decimal)readerData["Peso"], 2).ToString().Trim(),
+                                        readerData["IdRemito"].ToString().Trim(),
+                                        readerData["NroDcto"].ToString().Trim(),
+                                        readerData["NroPedido"].ToString().Trim(),
+                                        readerData["Conocimiento"].ToString().Trim(),
+                                        readerData["Comentario"].ToString().Trim(),
+                                        cliente
+                                        ));
+                                }
+
+                                remitos.Add(new Remito(int.Parse(sIDRemito), lBultosVertical));
                             }
-
-                            remitos.Add(new Remito(int.Parse(sIDRemito), lBultosVertical));
-                        }
-                        else
-                        {
-                            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente);
-                            if (connDB.State == ConnectionState.Open) connDB.Close();
-                            if (connLog.State == ConnectionState.Open) connLog.Close();
-                            response.message = "Notificacion: No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente;
-                            return response;
+                            else
+                            {
+                                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                                if (connDB.State == ConnectionState.Open) connDB.Close();
+                                if (connLog.State == ConnectionState.Open) connLog.Close();
+                                response.message = "Notificacion: No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                                return response;
+                            }
                         }
                     }
-                }
-                else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOSXD))
-                {
-                    using (SqlDataReader readerCantidad = new SqlCommand
+                    else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOSXD))
                     {
-                        Connection = connDB,
-                        CommandType = CommandType.Text,
-                        CommandTimeout = timeOutQueries,
-                        CommandText = queriesSQL.cant_BultosXD,
-                        Parameters =
+                        using (SqlDataReader readerCantidad = new SqlCommand
+                        {
+                            Connection = connDB,
+                            CommandType = CommandType.Text,
+                            CommandTimeout = timeOutQueries,
+                            CommandText = queriesSQL.cant_BultosXD,
+                            Parameters =
                         {
                             new SqlParameter { ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
                         }
-                    }.ExecuteReader())
-                    {
-                        if (readerCantidad.HasRows)
+                        }.ExecuteReader())
                         {
-                            while (readerCantidad.Read())
+                            if (readerCantidad.HasRows)
                             {
-                                cantidadTotal = StringHelper.LimpiarCampo(readerCantidad["Cantidad"]);
+                                while (readerCantidad.Read())
+                                {
+                                    cantidadTotal = StringHelper.LimpiarCampo(readerCantidad["Cantidad"]);
+                                }
+                            }
+                            else
+                            {
+                                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                                if (connDB.State == ConnectionState.Open) connDB.Close();
+                                if (connLog.State == ConnectionState.Open) connLog.Close();
+                                response.message = "ERROR: Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                                return response;
                             }
                         }
-                        else
-                        {
-                            log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente);
-                            if (connDB.State == ConnectionState.Open) connDB.Close();
-                            if (connLog.State == ConnectionState.Open) connLog.Close();
-                            response.message = "ERROR: Error buscando cantidad en Remitos para IDRemito: " + sIDRemito + " - cliente: " + cliente;
-                            return response;
-                        }
-                    }
 
-                    using (SqlDataReader readerData = new SqlCommand
-                    {
-                        Connection = connDB,
-                        CommandType = CommandType.Text,
-                        CommandTimeout = timeOutQueries,
-                        CommandText = queriesSQL.sRemitosBultosXD,
-                        Parameters =
+                        using (SqlDataReader readerData = new SqlCommand
+                        {
+                            Connection = connDB,
+                            CommandType = CommandType.Text,
+                            CommandTimeout = timeOutQueries,
+                            CommandText = queriesSQL.sRemitosBultosXD,
+                            Parameters =
                         {
                             new SqlParameter {ParameterName = "@CodCliente", SqlDbType = SqlDbType.Int, Value = int.Parse(cliente)},
                             new SqlParameter {ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)}
                         }
-                    }.ExecuteReader())
-                    {
-                        if (readerData.HasRows)
+                        }.ExecuteReader())
                         {
-                            while (readerData.Read())
+                            if (readerData.HasRows)
                             {
-                                etiquetasCount++;
+                                while (readerData.Read())
+                                {
+                                    etiquetasCount++;
 
-                                BultosXD nBultoXD = new BultosXD();
+                                    BultosXD nBultoXD = new BultosXD();
 
-                                nBultoXD.Origen = StringHelper.LimpiarCampo(readerData["Origen"]);
-                                nBultoXD.Domicilio = StringHelper.LimpiarCampo(readerData["Domicilio"]);
-                                nBultoXD.Localidad = StringHelper.LimpiarCampo(readerData["Localidad"]);
-                                nBultoXD.Mail = StringHelper.LimpiarCampo(readerData["Mail"]);
-                                nBultoXD.Url = StringHelper.LimpiarCampo(readerData["Url"]);
-                                nBultoXD.Nro_seguimiento = StringHelper.LimpiarCampo(readerData["Nro_seguimiento"]);
-                                nBultoXD.Fecha = StringHelper.LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
-                                nBultoXD.Destino_cod = StringHelper.LimpiarCampo(readerData["Destino_cod"]);
-                                nBultoXD.Bultos = StringHelper.LimpiarCampo(readerData["Bultos"]);
-                                nBultoXD.Destino_razon_soc = StringHelper.LimpiarCampo(readerData["Destino_razon_soc"]);
-                                nBultoXD.Tipo_servicio = StringHelper.LimpiarCampo(readerData["Tipo_servicio"]);
-                                nBultoXD.Cantidad_etiquetas = Convert.ToInt32(cantidadTotal);
+                                    nBultoXD.Origen = StringHelper.LimpiarCampo(readerData["Origen"]);
+                                    nBultoXD.Domicilio = StringHelper.LimpiarCampo(readerData["Domicilio"]);
+                                    nBultoXD.Localidad = StringHelper.LimpiarCampo(readerData["Localidad"]);
+                                    nBultoXD.Mail = StringHelper.LimpiarCampo(readerData["Mail"]);
+                                    nBultoXD.Url = StringHelper.LimpiarCampo(readerData["Url"]);
+                                    nBultoXD.Nro_seguimiento = StringHelper.LimpiarCampo(readerData["Nro_seguimiento"]);
+                                    nBultoXD.Fecha = StringHelper.LimpiarCampo(readerData["Fecha"]) != "" ? Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["Fecha"])).ToString("dd/MM/yyyy HH:mm") : "";
+                                    nBultoXD.Destino_cod = StringHelper.LimpiarCampo(readerData["Destino_cod"]);
+                                    nBultoXD.Bultos = StringHelper.LimpiarCampo(readerData["Bultos"]);
+                                    nBultoXD.Destino_razon_soc = StringHelper.LimpiarCampo(readerData["Destino_razon_soc"]);
+                                    nBultoXD.Tipo_servicio = StringHelper.LimpiarCampo(readerData["Tipo_servicio"]);
+                                    nBultoXD.Cantidad_etiquetas = Convert.ToInt32(cantidadTotal);
 
-                                remitos.Add(new Remito(int.Parse(sIDRemito), nBultoXD));
+                                    remitos.Add(new Remito(int.Parse(sIDRemito), nBultoXD));
+                                }
+                            }
+                            else
+                            {
+                                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                                if (connDB.State == ConnectionState.Open) connDB.Close();
+                                if (connLog.State == ConnectionState.Open) connLog.Close();
+                                response.message = "Notificacion: No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                                return response;
                             }
                         }
-                        else
+                    }
+                    else
+                    {
+                        vertical = false;
+                        List<Etiqueta> lEtiquetas = new List<Etiqueta>();
+                        using (SqlDataReader sqlReader = new SqlCommand
                         {
-                            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente);
-                            if (connDB.State == ConnectionState.Open) connDB.Close();
-                            if (connLog.State == ConnectionState.Open) connLog.Close();
-                            response.message = "Notificacion: No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente;
-                            return response;
-                        }
-                    }
-                }
-                else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
-                {
-                    string message;
-
-                    log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Obteniendo datos para etiquetas BultosDHLApple, IDRemito: " + sIDRemito + " - cliente: " + cliente);
-                    etiquedasBultosDHL = new RepositorioEtiquetasApple().ObtenerDatosEtiquetasBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente,nroOperacion,nroViaje, idPallet, out message);
-
-
-                    if (etiquedasBultosDHL.Count() == 0)
-                    {
-                        log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron datos para etiquetas BultosDHLApple para IDRemito: " + sIDRemito + " - cliente: " + cliente);
-                        response.message = message;
-                        return response;
-                    }else
-                    {
-                        log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Se encontraron : " + etiquedasBultosDHL.Count() + " etiquetas BultosDHLApple para el remito: " + sIDRemito + " - cliente: " + cliente);
-                    }
-                 
-                }
-                else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
-                {
-                    string message;
-                    etiquedasBultosDHL = new RepositorioEtiquetasApple().ObtenerDatosEtiquetasBultosDHLApple(connDB, log, connLog, severidades, timeOutQueries, sIDRemito, cliente,nroOperacion,nroViaje,idPallet, out message);
-
-                    if (remitos.Count() == 0)
-                    {
-                        response.message = message;
-                        return response;
-                    }
-                }
-                else
-                {
-                    vertical = false;
-                    List<Etiqueta> lEtiquetas = new List<Etiqueta>();
-                    using (SqlDataReader sqlReader = new SqlCommand
-                    {
-                        CommandText = queriesSQL.sRemitos,
-                        CommandType = CommandType.Text,
-                        CommandTimeout = timeOutQueries,
-                        Connection = connDB,
-                        Parameters =
+                            CommandText = queriesSQL.sRemitos,
+                            CommandType = CommandType.Text,
+                            CommandTimeout = timeOutQueries,
+                            Connection = connDB,
+                            Parameters =
                         {
                             new SqlParameter{ ParameterName = "@IDRemito",SqlDbType = SqlDbType.Int,Value = int.Parse(sIDRemito)},
                             new SqlParameter{ ParameterName = "@Cod_Cliente",SqlDbType = SqlDbType.Int,Value = int.Parse(cliente)}
                         }
-                    }.ExecuteReader())
-                    {
-                        if (sqlReader.HasRows)
+                        }.ExecuteReader())
                         {
-                            while (sqlReader.Read())
+                            if (sqlReader.HasRows)
                             {
-                                etiquetasCount++;
-                                lEtiquetas.Add(new Etiqueta(
-                                    sqlReader["ID_Remito"].ToString().Trim(),
-                                    sqlReader["Cod_cliente"].ToString().Trim(),
-                                    sqlReader["CE"].ToString().Trim(),
-                                    sqlReader["Grupo"].ToString().Trim(),
-                                    sqlReader["Nro_Remito"].ToString().Trim(),
-                                    sqlReader["Nro_Pedido"].ToString().Trim(),
-                                    sqlReader["Domicilio"].ToString().Trim(),
-                                    sqlReader["Region"].ToString().Trim(),
-                                    sqlReader["Provincia"].ToString().Trim(),
-                                    sqlReader["Localidad"].ToString().Trim(),
-                                    sqlReader["Zona"].ToString().Trim(),
-                                    sqlReader["CP"].ToString().Trim(),
-                                    sqlReader["Razon_Soc"].ToString().Trim(),
-                                    sqlReader["Bultos"].ToString().Trim(),
-                                    sqlReader["Pallets"].ToString().Trim(),
-                                    sqlReader["Descripcion"].ToString().Trim(),
-                                    sqlReader["Kilos"].ToString().Trim(),
-                                    sqlReader["m3"].ToString().Trim(),
-                                    sqlReader["Cantidad"].ToString().Trim(),
-                                    sqlReader["Fecha_Remito"].ToString().Trim(),
-                                    sqlReader["ID_PE_REAL"].ToString().Trim(),
-                                    sqlReader["Cod_Cia"].ToString().Trim(),
-                                    sqlReader["Nombre_cliente"].ToString().Trim(),
-                                    sqlReader["Contacto_Celular"].ToString().Trim()
-                                ));
-                            }
+                                while (sqlReader.Read())
+                                {
+                                    etiquetasCount++;
+                                    lEtiquetas.Add(new Etiqueta(
+                                        sqlReader["ID_Remito"].ToString().Trim(),
+                                        sqlReader["Cod_cliente"].ToString().Trim(),
+                                        sqlReader["CE"].ToString().Trim(),
+                                        sqlReader["Grupo"].ToString().Trim(),
+                                        sqlReader["Nro_Remito"].ToString().Trim(),
+                                        sqlReader["Nro_Pedido"].ToString().Trim(),
+                                        sqlReader["Domicilio"].ToString().Trim(),
+                                        sqlReader["Region"].ToString().Trim(),
+                                        sqlReader["Provincia"].ToString().Trim(),
+                                        sqlReader["Localidad"].ToString().Trim(),
+                                        sqlReader["Zona"].ToString().Trim(),
+                                        sqlReader["CP"].ToString().Trim(),
+                                        sqlReader["Razon_Soc"].ToString().Trim(),
+                                        sqlReader["Bultos"].ToString().Trim(),
+                                        sqlReader["Pallets"].ToString().Trim(),
+                                        sqlReader["Descripcion"].ToString().Trim(),
+                                        sqlReader["Kilos"].ToString().Trim(),
+                                        sqlReader["m3"].ToString().Trim(),
+                                        sqlReader["Cantidad"].ToString().Trim(),
+                                        sqlReader["Fecha_Remito"].ToString().Trim(),
+                                        sqlReader["ID_PE_REAL"].ToString().Trim(),
+                                        sqlReader["Cod_Cia"].ToString().Trim(),
+                                        sqlReader["Nombre_cliente"].ToString().Trim(),
+                                        sqlReader["Contacto_Celular"].ToString().Trim()
+                                    ));
+                                }
 
-                            remitos.Add(new Remito(int.Parse(sIDRemito), lEtiquetas));
-                        }
-                        else
-                        {
-                            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente);
-                            if (connDB.State == ConnectionState.Open) connDB.Close();
-                            if (connLog.State == ConnectionState.Open) connLog.Close();
-                            response.message = "Notificacion: No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente;
-                            return response;
+                                remitos.Add(new Remito(int.Parse(sIDRemito), lEtiquetas));
+                            }
+                            else
+                            {
+                                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente);
+                                if (connDB.State == ConnectionState.Open) connDB.Close();
+                                if (connLog.State == ConnectionState.Open) connLog.Close();
+                                response.message = "Notificacion: No se encontraron remitos disponibles para IDRemito: " + sIDRemito + " - cliente: " + cliente;
+                                return response;
+                            }
                         }
                     }
                 }
@@ -554,7 +610,7 @@ public class WSEtiquetas : WebService
             System.Drawing.Image etiquetaImg = null;
             System.Drawing.Image logoImg = null;
 
-            if (!string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
+            if (!string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE) && !string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
             {
                 etiquetaImg = obtenerTemplate(template, vertical);
                 logoImg = obtenerLogo(etiquetaImg, vertical);
@@ -587,15 +643,15 @@ public class WSEtiquetas : WebService
                 }
                 else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
                 {
-                    var archivo = new HandlersEtiquetasApple(log, connLog, severidades, MODO_OBTENCION_ARCHIVO, gvalues, size, TEMPLATE_BULTOS_DHL_APPLE).GenerarPDFBultosDHLApple(etiquedasBultosDHL, size.ToLower(), format);
-                    response.message = "Etiquetas generadas con exito";
+                    var archivo = new HandlersEtiquetasApple(log, connLog, severidades, MODO_OBTENCION_ARCHIVO, gvalues, size, TEMPLATE_BULTOS_DHL_APPLE,format).GenerarPDFBultosDHLApple(etiquedasBultosDHL);
+        
                     response.Archivos.Add(archivo);
                 }
                 else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
                 { 
-                    var archivo = new HandlersEtiquetasApple(log,connLog,severidades,MODO_OBTENCION_ARCHIVO,gvalues,size, TEMPLATE_VIAJES_DHL_Apple).GenerarPDFBultosDHLViajesApple(remitos, size.ToLower(), format);
-                    response.message = "Etiquetas generadas con exito";
-                    response.Archivos.Add(archivo);
+                    var archivo = new HandlersEtiquetasApple(log,connLog,severidades,MODO_OBTENCION_ARCHIVO,gvalues,size, TEMPLATE_VIAJES_DHL_Apple, format).GenerarPDFBultosDHLViajesApple(etiquetaBultoViajeDHLApple, out response.message);
+                    if (archivo != null) response.Archivos.Add(archivo);
+                    else return response;
                 }
                 else
                 {

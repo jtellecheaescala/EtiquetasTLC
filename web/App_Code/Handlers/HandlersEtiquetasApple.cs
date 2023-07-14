@@ -35,10 +35,11 @@ public class HandlersEtiquetasApple
     private Document document;
     private ImageData logo;
     private string size;
+    private string format;
     private string etiqueta;
 
 
-    public HandlersEtiquetasApple(Log _log, SqlConnection _connLog, Globals.staticValues.SeveridadesClass _severidades, string _MODO_OBTENCION_ARCHIVO, Globals.staticValues _gvalues, string _size, string _etiqueta)
+    public HandlersEtiquetasApple(Log _log, SqlConnection _connLog, Globals.staticValues.SeveridadesClass _severidades, string _MODO_OBTENCION_ARCHIVO, Globals.staticValues _gvalues, string _size, string _etiqueta, string _format)
     {
         this.log = _log;
         this.connLog = _connLog;
@@ -47,6 +48,7 @@ public class HandlersEtiquetasApple
         this.gvalues = _gvalues;
         this.size = _size;
         this.etiqueta = _etiqueta;
+        this.format = _format;
         InicializarHandler();
     }
 
@@ -90,13 +92,14 @@ public class HandlersEtiquetasApple
         }
     }
 
-    public Archivo GenerarPDFBultosDHLViajesApple(List<Remito> remitos, string size, string format)
+    public Archivo GenerarPDFBultosDHLViajesApple(EtiquetaBultoViajeDHLApple etiqueta, out string message)
     {
+        message = null;
         try
         {
-            foreach (var r in remitos)
-            {
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo de barra para IDRemito: " + r.ID_Remito);
+            logo = ImageDataFactory.Create(gvalues.PathLogo);
+
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo de barra para viaje: " +etiqueta.Nro_Viaje);
 
                 #region Generacion de codigo de barras
                 System.Drawing.Image barcode1 = null;
@@ -108,32 +111,31 @@ public class HandlersEtiquetasApple
                     EncodingOptions encodingBC = new EncodingOptions() { Width = 400, Height = 100, Margin = 0, PureBarcode = true };
                     bcWriter.Options = encodingBC;
                     bcWriter.Format = BarcodeFormat.CODE_128;
-                    barcode1 = new Bitmap(bcWriter.Write(r.bultosXD.Nro_seguimiento));
+                    barcode1 = new Bitmap(bcWriter.Write(etiqueta.Nro_Viaje));
                     var img = new ImageHelper().ImageToByte(barcode1);
                     codigoBarras = ImageDataFactory.Create(img);
                 }
                 catch (Exception e)
                 {
-                    log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar codigo de barra para IDRemito: " + r.ID_Remito + ". Detalles: " + e.Message);
+                    log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar codigo de barra para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + e.Message);
                 }
                 #endregion
 
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas para IDRemito: " + r.ID_Remito + " - Tamaño: " + size + " - Formato: " + format);
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas para Viaje: " + etiqueta.Nro_Viaje + " - Tamaño: " + size + " - Formato: " + format);
 
-                for (int bulto = 1; bulto <= r.bultosXD.Cantidad_etiquetas; bulto++)
-                {
+     
                     #region Tabla con los datos de cabecera y el logo
                     Table tablaEncabezado = new Table(UnitValue.CreatePercentArray(new float[] { 60, 40 }));
 
-                    tablaEncabezado.AddCell(new Cell().Add(new Paragraph(r.bultosXD.Origen).SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
-                                                        .Add(new Paragraph(r.bultosXD.Domicilio).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
-                                                        .Add(new Paragraph(r.bultosXD.Localidad).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
-                                                        .Add(new Paragraph(r.bultosXD.Mail).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
-                                                        .Add(new Paragraph(r.bultosXD.Url).SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                    tablaEncabezado.AddCell(new Cell().Add(new Paragraph("Origen").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
+                                                        .Add(new Paragraph("Domicilio").SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                        .Add(new Paragraph("Localidad").SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                        .Add(new Paragraph("Mail").SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
+                                                        .Add(new Paragraph("URL").SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160))
                                                         .SetBorder(Border.NO_BORDER))
                                     .SetMinHeight(35).SetMaxHeight(35);
                     tablaEncabezado.AddCell(new Cell().Add(new iText.Layout.Element.Image(logo).SetAutoScale(true).SetPadding(0).SetMargins(2, 5, 0, 0).SetHorizontalAlignment(HorizontalAlignment.RIGHT)).SetBorder(Border.NO_BORDER)
-                        .Add(new Paragraph(r.bultosXD.Tipo_servicio).SetMultipliedLeading(1).SetMarginTop(9).SetFontSize(9).SetTextAlignment(TextAlignment.CENTER).SetMinHeight(20).SetMaxHeight(20).SetMaxWidth(160)))
+                        .Add(new Paragraph("Tipo Servicio").SetMultipliedLeading(1).SetMarginTop(9).SetFontSize(9).SetTextAlignment(TextAlignment.CENTER).SetMinHeight(20).SetMaxHeight(20).SetMaxWidth(160)))
                         .SetMinHeight(75).SetMaxHeight(75);
                     tablaEncabezado.SetWidth(UnitValue.CreatePercentValue(100));
                     tablaEncabezado.SetHeight(UnitValue.CreatePercentValue(100));
@@ -145,7 +147,7 @@ public class HandlersEtiquetasApple
                     #region Tabla con el nro de seguimiento
                     Table tbNroSeguimiento = new Table(UnitValue.CreatePercentArray(new float[] { 60, 40 }));
                     tbNroSeguimiento.AddCell(new Cell().Add(new Paragraph("Número de Seguimiento: ").SetFontSize(13).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetBorder(Border.NO_BORDER));
-                    tbNroSeguimiento.AddCell(new Cell().Add(new Paragraph(r.bultosXD.Nro_seguimiento).SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
+                    tbNroSeguimiento.AddCell(new Cell().Add(new Paragraph("Nro Seguimient").SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
                     tbNroSeguimiento.SetMargins(0, 0, 0, 6);
 
                     document.Add(tbNroSeguimiento);
@@ -156,7 +158,7 @@ public class HandlersEtiquetasApple
                     Cell celdaCodigoBarras = (new Cell().Add(new iText.Layout.Element.Image(codigoBarras).SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
 
                     Table codigoBarra = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
-                    codigoBarra.AddCell(new Cell().Add(new Paragraph("Fecha: " + r.bultosXD.Fecha).SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMargins(15, 0, 0, 2)).SetBorder(Border.NO_BORDER));
+                    codigoBarra.AddCell(new Cell().Add(new Paragraph("Fecha: " + "01/01/2024").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMargins(15, 0, 0, 2)).SetBorder(Border.NO_BORDER));
                     codigoBarra.AddCell(celdaCodigoBarras.SetBorder(Border.NO_BORDER));
                     codigoBarra.SetWidth(UnitValue.CreatePercentValue(100));
                     codigoBarra.SetMarginLeft(4);
@@ -176,22 +178,22 @@ public class HandlersEtiquetasApple
 
                     int fontSizeBultos = 70;
                     var vAlignBultos = VerticalAlignment.TOP;
-                    if (r.bultosXD.Bultos.Length >= 4)
-                    {
-                        fontSizeBultos = 60;
-                        vAlignBultos = VerticalAlignment.MIDDLE;
-                    }
+                    //if (r.bultosXD.Bultos.Length >= 4)
+                    //{
+                    //    fontSizeBultos = 60;
+                    //    vAlignBultos = VerticalAlignment.MIDDLE;
+                    //}
 
                     Table tbIndicadores = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
-                    tbIndicadores.AddCell(new Cell().Add(new Paragraph(r.bultosXD.Destino_cod).SetFontSize(70).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetMinHeight(100).SetMaxHeight(100).SetMaxWidth(50).SetBorder(Border.NO_BORDER));
-                    tbIndicadores.AddCell(new Cell().Add(new Paragraph(r.bultosXD.Bultos).SetVerticalAlignment(vAlignBultos).SetFontSize(fontSizeBultos).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetMinHeight(100).SetMaxWidth(50).SetMaxHeight(100).SetBorder(Border.NO_BORDER));
+                    tbIndicadores.AddCell(new Cell().Add(new Paragraph("Destino Cod").SetFontSize(70).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetMinHeight(100).SetMaxHeight(100).SetMaxWidth(50).SetBorder(Border.NO_BORDER));
+                    tbIndicadores.AddCell(new Cell().Add(new Paragraph("Bultos").SetVerticalAlignment(vAlignBultos).SetFontSize(fontSizeBultos).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetMinHeight(100).SetMaxWidth(50).SetMaxHeight(100).SetBorder(Border.NO_BORDER));
                     tbIndicadores.SetWidth(UnitValue.CreatePercentValue(100));
                     tbIndicadores.SetMargins(-10, 0, 0, 0);
 
                     document.Add(tbIndicadores);
 
                     Table tbContenido = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
-                    tbContenido.AddCell(new Cell().Add(new Paragraph(r.bultosXD.Destino_razon_soc).SetMultipliedLeading(1).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER).SetMaxWidth(50).SetMinHeight(30).SetMaxHeight(30));
+                    tbContenido.AddCell(new Cell().Add(new Paragraph("Razon social").SetMultipliedLeading(1).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER).SetMaxWidth(50).SetMinHeight(30).SetMaxHeight(30));
                     tbContenido.AddCell(new Cell().Add(new Paragraph("Sin verificar contenido").SetVerticalAlignment(VerticalAlignment.MIDDLE).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER)).SetMinHeight(30).SetMaxWidth(50).SetMaxHeight(30).SetBorder(Border.NO_BORDER));
                     tbContenido.SetWidth(UnitValue.CreatePercentValue(100));
                     tbContenido.SetMargins(-20, 0, 0, 6);
@@ -199,9 +201,7 @@ public class HandlersEtiquetasApple
                     document.Add(tbContenido);
 
                     #endregion
-
-                }
-            }
+                      
 
             pdf.Close();
 
@@ -239,7 +239,7 @@ public class HandlersEtiquetasApple
 
     }
 
-    public Archivo GenerarPDFBultosDHLApple(List<EtiquetaBultoDHLApple> etiquetas, string size, string format)
+    public Archivo GenerarPDFBultosDHLApple(List<EtiquetaBultoDHLApple> etiquetas)
     {
 
         try
@@ -316,7 +316,7 @@ public class HandlersEtiquetasApple
         }
         catch (Exception e)
         {
-            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF BultosDHLApple" + e.Message.ToString());
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF BultosViajeDHLApple" + e.Message.ToString());
 
             throw e;
         }
