@@ -60,4 +60,17 @@ public class ImageHelper
         return codigoBarras;
     
     }
+
+    public Image CrearCodigoQR(string codigo)
+    {
+        System.Drawing.Image QRcode = null;
+
+        BarcodeWriter bcWriter = new BarcodeWriter();
+        EncodingOptions encodingQr = new EncodingOptions() { Width = 330, Height = 330, Margin = 1 };
+        bcWriter.Options = encodingQr;
+        bcWriter.Format = BarcodeFormat.QR_CODE;
+        QRcode = new Bitmap(bcWriter.Write(codigo));
+
+        return QRcode;
+    }
 }

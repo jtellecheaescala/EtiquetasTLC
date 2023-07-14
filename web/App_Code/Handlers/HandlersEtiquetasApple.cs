@@ -98,36 +98,29 @@ public class HandlersEtiquetasApple
         {
             try
             {
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando logo para etiqueta VIAJES_DHL_APPLE para viaje: " + etiqueta.Nro_Viaje);
+
                 logo = ImageDataFactory.Create(gvalues.PathLogo);
             }
             catch (Exception e)
             {
-                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar logo de barra para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + e.Message);
+                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar logo para etiqueta VIAJES_DHL_APPLE para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + e.Message);
             }
-            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo de barra para viaje: " + etiqueta.Nro_Viaje);
-
-
-            System.Drawing.Image barcode1 = null;
+           
             ImageData codigoBarras = null;
 
             try
             {
-                BarcodeWriter bcWriter = new BarcodeWriter();
-                EncodingOptions encodingBC = new EncodingOptions() { Width = 400, Height = 100, Margin = 0, PureBarcode = true };
-                bcWriter.Options = encodingBC;
-                bcWriter.Format = BarcodeFormat.CODE_128;
-                barcode1 = new Bitmap(bcWriter.Write(etiqueta.Nro_Viaje));
-                var img = new ImageHelper().ImageToByte(barcode1);
-                codigoBarras = ImageDataFactory.Create(img);
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo de barra para etiqueta VIAJES_DHL_APPLE para viaje: " + etiqueta.Nro_Viaje);
+                codigoBarras = new ImageHelper().CrearCodigoBarras(etiqueta.Nro_Viaje);
             }
             catch (Exception e)
             {
-                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar codigo de barra para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + e.Message);
+                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar codigo de barra para etiqueta VIAJES_DHL_APPLE para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + e.Message);
             }
 
-            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas para Viaje: " + etiqueta.Nro_Viaje + " - Tamaño: " + size + " - Formato: " + format);
 
-
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas VIAJES_DHL_APPLE para Viaje: " + etiqueta.Nro_Viaje + " - Tamaño: " + size + " - Formato: " + format);
 
             Table tbHeader = new Table(UnitValue.CreatePercentArray(new float[] { 60, 20 }));
 
@@ -176,27 +169,19 @@ public class HandlersEtiquetasApple
             pdf.Close();
 
             string fileName = System.IO.Path.GetFileName(ruta);
-            if (MODO_OBTENCION_ARCHIVO == "BASE64")
-            {
-                Byte[] pdfEnByte = File.ReadAllBytes(ruta);
-                archivoPdf.base64 = Convert.ToBase64String(pdfEnByte);
-                archivoPdf.nombre = fileName;
 
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta PDFBultosVertical generada con exito Tamaño: " + size + " - Formato: " + format + ". Modo elegido: BASE64");
-            }
-            else if (MODO_OBTENCION_ARCHIVO == "URL")
-            {
-                string url = System.IO.Path.Combine(gvalues.RaizURL, fileName);
-                archivoPdf.url = url;
-                archivoPdf.nombre = fileName;
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta generada con exito - Tamaño: " + size + " - Formato: " + format + ". Modo elegido: URL");
-            }
+            Byte[] pdfEnByte = File.ReadAllBytes(ruta);
+            archivoPdf.base64 = Convert.ToBase64String(pdfEnByte);
+            archivoPdf.nombre = fileName;
+
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta VIAJES_DHL_APPLE generada con exito Tamaño: " + size + " - Formato: " + format + ". Modo elegido: BASE64");
+
 
             return archivoPdf;
         }
         catch (Exception e)
         {
-            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF" + e.Message.ToString());
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF VIAJES_DHL_APPLE" + e.Message.ToString());
 
             return archivoPdf;
         }
@@ -216,7 +201,7 @@ public class HandlersEtiquetasApple
         {
             foreach (var etiqueta in etiquetas)
             {
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas BultosDHLApple para IDRemito: " + etiqueta.ID_Remito + " - Tamaño: " + size + " - Formato: " + format);
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas BULTOS_DHL_APPLE para IDRemito: " + etiqueta.ID_Remito + " - Tamaño: " + size + " - Formato: " + format);
 
                 Table tbHeader = new Table(UnitValue.CreatePercentArray(new float[] { 60, 40 }));
 
@@ -266,27 +251,19 @@ public class HandlersEtiquetasApple
             pdf.Close();
 
             string fileName = System.IO.Path.GetFileName(ruta);
-            if (MODO_OBTENCION_ARCHIVO == "BASE64")
-            {
-                Byte[] pdfEnByte = File.ReadAllBytes(ruta);
-                archivoPdf.base64 = Convert.ToBase64String(pdfEnByte);
-                archivoPdf.nombre = fileName;
 
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta PDFBultosVertical BultosDHLApple generada con exito Tamaño: " + size + " - Formato: " + format + ". Modo elegido: BASE64");
-            }
-            else if (MODO_OBTENCION_ARCHIVO == "URL")
-            {
-                string url = System.IO.Path.Combine(gvalues.RaizURL, fileName);
-                archivoPdf.url = url;
-                archivoPdf.nombre = fileName;
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta BultosDHLApple generada con exito - Tamaño: " + size + " - Formato: " + format + ". Modo elegido: URL");
-            }
+            Byte[] pdfEnByte = File.ReadAllBytes(ruta);
+            archivoPdf.base64 = Convert.ToBase64String(pdfEnByte);
+            archivoPdf.nombre = fileName;
+
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Etiqueta PDFBultosVertical BULTOS_DHL_APPLE generada con exito Tamaño: " + size + " - Formato: " + format + ". Modo elegido: BASE64");
+
 
             return archivoPdf;
         }
         catch (Exception e)
         {
-            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF BultosViajeDHLApple" + e.Message.ToString());
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF BULTOS_DHL_APPLE" + e.Message.ToString());
 
             throw e;
         }
