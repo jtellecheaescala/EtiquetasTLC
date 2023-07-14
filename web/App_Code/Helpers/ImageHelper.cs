@@ -58,8 +58,10 @@ public class ImageHelper
         codigoBarras = ImageDataFactory.Create(img);
 
         return codigoBarras;
-    
+
     }
+
+
 
     public Image CrearCodigoQR(string codigo)
     {
@@ -72,5 +74,25 @@ public class ImageHelper
         QRcode = new Bitmap(bcWriter.Write(codigo));
 
         return QRcode;
+    }
+
+    public iText.Layout.Element.Image CrearCodigoQRIText(string codigo)
+    {
+        var codigoQR = CrearCodigoQR(codigo);
+
+        ImageData imagen = ImageDataFactory.Create(ImageToByteArray(codigoQR));
+
+        return new iText.Layout.Element.Image(imagen);
+    }
+
+
+
+    public byte[] ImageToByteArray(System.Drawing.Image image)
+    {
+        using (var ms = new MemoryStream())
+        {
+            image.Save(ms, image.RawFormat);
+            return ms.ToArray();
+        }
     }
 }

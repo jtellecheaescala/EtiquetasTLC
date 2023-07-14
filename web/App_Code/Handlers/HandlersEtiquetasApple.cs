@@ -153,8 +153,11 @@ public class HandlersEtiquetasApple
 
             document.Add(tbBody);
 
-            Cell celdaCodigoBarras = (new Cell().Add(new iText.Layout.Element.Image(codigoBarras).SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
 
+           // var codigoQR = new ImageHelper().CrearCodigoQRIText(etiqueta.Nro_Viaje);
+
+            //Cell celdaCodigoBarras = (new Cell().Add(codigoQR.SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
+            Cell celdaCodigoBarras = (new Cell().Add(new iText.Layout.Element.Image(codigoBarras).SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
             Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
             tbFooter.AddCell(new Cell()
                 .Add(new Paragraph("Fecha ruteo: " + "01-01-2024").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMargins(15, 0, 0, 2))
@@ -179,11 +182,12 @@ public class HandlersEtiquetasApple
 
             return archivoPdf;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF VIAJES_DHL_APPLE" + e.Message.ToString());
+            // TODO-JUANISi falla, el endpoint responde que se genero todo OK. C
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF VIAJES_DHL_APPLE" + ex.Message.ToString());
 
-            return archivoPdf;
+            throw ex;
         }
         finally
         {
