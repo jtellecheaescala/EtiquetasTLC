@@ -129,47 +129,49 @@ public class HandlersEtiquetasApple
 
 
 
-            Table tablaEncabezado = new Table(UnitValue.CreatePercentArray(new float[] { 60, 20 }));
+            Table tbHeader = new Table(UnitValue.CreatePercentArray(new float[] { 60, 20 }));
 
-            tablaEncabezado.AddCell(new Cell().Add(new Paragraph(String.Empty).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER).SetBold().SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
+            tbHeader.AddCell(new Cell().Add(new Paragraph(String.Empty).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER).SetBold().SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
                                               .Add(new Paragraph("Rutas").SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160)).SetBorder(Border.NO_BORDER))
                             .SetMinHeight(35).SetMaxHeight(35).SetBorder(Border.NO_BORDER);
 
 
-            tablaEncabezado.AddCell(new Cell().Add(new iText.Layout.Element.Image(logo).SetAutoScale(true).SetPadding(0).SetMargins(2, 5, 0, 0).SetHorizontalAlignment(HorizontalAlignment.RIGHT)).SetBorder(Border.NO_BORDER))
+            tbHeader.AddCell(new Cell().Add(new iText.Layout.Element.Image(logo).SetAutoScale(true).SetPadding(0).SetMargins(2, 5, 0, 0).SetHorizontalAlignment(HorizontalAlignment.RIGHT)).SetBorder(Border.NO_BORDER))
                 .SetMinHeight(75).SetMaxHeight(75);
-            tablaEncabezado.SetWidth(UnitValue.CreatePercentValue(100));
-            tablaEncabezado.SetHeight(UnitValue.CreatePercentValue(40));
-            tablaEncabezado.SetMargins(6, 1, 0, 6);
+            tbHeader.SetWidth(UnitValue.CreatePercentValue(100));
+            tbHeader.SetHeight(UnitValue.CreatePercentValue(40));
+            tbHeader.SetMargins(6, 2, 0, 2);
 
-            document.Add(tablaEncabezado);
+            document.Add(tbHeader);
 
 
-            Table tbContabilizadores = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
-            tbContabilizadores.AddCell(new Cell().Add(new Paragraph("Numero de Viaje:").SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
-            tbContabilizadores.AddCell(new Cell().Add(new Paragraph(etiqueta.Nro_Viaje).SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
-            tbContabilizadores.AddCell(new Cell().Add(new Paragraph("# Bultos:").SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
-            tbContabilizadores.AddCell(new Cell().Add(new Paragraph(etiqueta.Cantidad_Bultos).SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
-            tbContabilizadores.AddCell(new Cell().Add(new Paragraph("# Ordenes:").SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
-            tbContabilizadores.AddCell(new Cell().Add(new Paragraph(etiqueta.Cantidad_Ordenes).SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()).SetBorder(Border.NO_BORDER));
+            Table tbBody = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
+            tbBody.AddCell(new Cell().Add(new Paragraph("Numero de Viaje:").SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()));
+            tbBody.AddCell(new Cell().Add(new Paragraph(etiqueta.Nro_Viaje).SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()));
 
-            tbContabilizadores.SetWidth(UnitValue.CreatePercentValue(100));
-            tbContabilizadores.SetMargins(4, 0, 0, 0);
+            tbBody.AddCell(new Cell().Add(new Paragraph("# Bultos:").SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()));
+            tbBody.AddCell(new Cell().Add(new Paragraph(etiqueta.Cantidad_Bultos).SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()));
 
-            document.Add(tbContabilizadores);
+            tbBody.AddCell(new Cell().Add(new Paragraph("# Ordenes:").SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()));
+            tbBody.AddCell(new Cell().Add(new Paragraph(etiqueta.Cantidad_Ordenes).SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()));
+
+            tbBody.SetWidth(UnitValue.CreatePercentValue(100));
+            tbBody.SetMargins(0, 2, 0, 2);
+
+            document.Add(tbBody);
 
             Cell celdaCodigoBarras = (new Cell().Add(new iText.Layout.Element.Image(codigoBarras).SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
 
-            Table codigoBarra = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
-            codigoBarra.AddCell(new Cell()
+            Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
+            tbFooter.AddCell(new Cell()
                 .Add(new Paragraph("Fecha ruteo: " + "01-01-2024").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMargins(15, 0, 0, 2))
                 .Add(new Paragraph("Fecha estimada salida: " + "01-01-2024").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMargins(15, 0, 0, 2))
-                .SetBorder(Border.NO_BORDER));
-            codigoBarra.AddCell(celdaCodigoBarras.SetBorder(Border.NO_BORDER));
-            codigoBarra.SetWidth(UnitValue.CreatePercentValue(100));
-            codigoBarra.SetMarginLeft(4);
+                );
+            tbFooter.AddCell(celdaCodigoBarras.SetBorder(Border.NO_BORDER));
+            tbFooter.SetWidth(UnitValue.CreatePercentValue(100));
+            tbFooter.SetMargins(4, 2, 0, 2);
 
-            document.Add(codigoBarra);
+            document.Add(tbFooter);
 
             pdf.Close();
 
