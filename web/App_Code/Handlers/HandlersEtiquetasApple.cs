@@ -224,7 +224,7 @@ public class HandlersEtiquetasApple
 
                 var p5 = new Paragraph(string.Format("Intento: {0}", etiqueta.NroReintento))
                     .SetFixedPosition(5, 20, 170).SetFontSize(10);
-                var p6 = new Paragraph(string.Format("Parcel ID: {0}", etiqueta.ParcelId.PadLeft(10, '0')))
+                var p6 = new Paragraph(string.Format("Parcel ID: {0}", etiqueta.ParcelId))
                     .SetFixedPosition(5, 10, 170).SetFontSize(10).SetBold();
                 var p7 = new Paragraph(string.Format("Fecha Viaje: {0}", etiqueta.FechaViaje))
                     .SetFixedPosition(5, 2, 170).SetFontSize(8);
