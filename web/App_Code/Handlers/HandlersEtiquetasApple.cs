@@ -70,11 +70,11 @@ public class HandlersEtiquetasApple
             else
             { // new PageSize(285, 220): representa: 100,5 x 77,6
               // new PageSize(170, 85):  representa: a 60 x 30 
-                pageSize = new PageSize(285, 220);
+                pageSize = new PageSize(170, 85);
             }
 
             document = new Document(pdf, pageSize);
-            document.SetMargins(0, 1, 0, 0);
+            document.SetMargins(0, 0, 0, 0);
 
             if (!Directory.Exists(gvalues.PathOut))
             {
@@ -198,14 +198,42 @@ public class HandlersEtiquetasApple
 
     public Archivo GenerarPDFBultosDHLApple(List<EtiquetaBultoDHLApple> etiquetas)
     {
-
         try
         {
+            bool addNewPage = false;
             foreach (var etiqueta in etiquetas)
             {
                 log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas BULTOS_DHL_APPLE para IDRemito: " + etiqueta.ID_Remito + " - Tamaño: " + size + " - Formato: " + format);
 
-                Table tbHeader = new Table(UnitValue.CreatePercentArray(new float[] { 60, 40 }));
+                if (addNewPage)
+                    document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+
+                var p1 = new Paragraph("Viaje:").SetFixedPosition(5, 70, 85).SetFontSize(10).SetBold();
+                var p2 = new Paragraph("Parada:").SetFixedPosition(80, 70, 90).SetFontSize(10).SetBold();
+
+                document.Add(p1);
+                document.Add(p2);
+
+                var p3 = new Paragraph(etiqueta.Nro_Viaje.PadLeft(6, '0'))
+                    .SetFixedPosition(5, 40, 80).SetFontSize(22).SetBold();
+                var p4 = new Paragraph(string.Format("{0}/{1}", etiqueta.Parada.PadLeft(2, '0'), etiqueta.CantParadasTotales.PadLeft(2, '0')))
+                    .SetFixedPosition(80, 20, 95).SetFontSize(34).SetBold();
+                
+                document.Add(p3);
+                document.Add(p4);
+
+                var p5 = new Paragraph(string.Format("Intento: {0}", etiqueta.NroReintento))
+                    .SetFixedPosition(5, 20, 170).SetFontSize(10);
+                var p6 = new Paragraph(string.Format("Parcel ID: {0}", etiqueta.ParcelId.PadLeft(10, '0')))
+                    .SetFixedPosition(5, 10, 170).SetFontSize(10).SetBold();
+                var p7 = new Paragraph(string.Format("Fecha Viaje: {0}", etiqueta.FechaViaje))
+                    .SetFixedPosition(5, 2, 170).SetFontSize(8);
+
+                document.Add(p5);
+                document.Add(p6);
+                document.Add(p7);
+
+                /*Table tbHeader = new Table(UnitValue.CreatePercentArray(new float[] { 60, 40 }));
 
                 tbHeader.AddCell(new Cell().Add(new Paragraph("Viaje:").SetFontSize(13).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMinHeight(15).SetMaxHeight(40).SetMaxWidth(400))
                                                     .SetBorder(Border.NO_BORDER))
@@ -220,20 +248,21 @@ public class HandlersEtiquetasApple
                 tbHeader.SetHeight(UnitValue.CreatePercentValue(100));
                 tbHeader.SetMargins(6, 1, 0, 6);
 
-                document.Add(tbHeader);
+                document.Add(tbHeader);*/
 
-                int fontSizeParadas = 50;
+                /*int fontSizeParadas = 50;
                 var vAlignBultos = VerticalAlignment.TOP;
 
                 Table tbBody = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
                 tbBody.AddCell(new Cell().Add(new Paragraph(etiqueta.Nro_Viaje.PadLeft(6, '0')).SetVerticalAlignment(vAlignBultos).SetFontSize(30).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxHeight(100).SetMaxWidth(50).SetBorder(Border.NO_BORDER));
+                tbBody.AddCell(new Cell());
                 tbBody.AddCell(new Cell().Add(new Paragraph(String.Format("{0}/{1}", etiqueta.Parada.PadLeft(2, '0'), etiqueta.CantParadasTotales.PadLeft(2, '0'))).SetVerticalAlignment(vAlignBultos).SetFontSize(fontSizeParadas).SetTextAlignment(TextAlignment.LEFT).SetBold()).SetMinHeight(100).SetMaxWidth(50).SetMaxHeight(100).SetBorder(Border.NO_BORDER));
                 tbBody.SetWidth(UnitValue.CreatePercentValue(100));
                 tbBody.SetMargins(6, 1, 0, 6);
 
-                document.Add(tbBody);
+                document.Add(tbBody);*/
 
-                int fontSizeFooter = 14;
+                /*int fontSizeFooter = 14;
 
                 Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 300, 60 }));
 
@@ -247,7 +276,8 @@ public class HandlersEtiquetasApple
                 tbFooter.SetHeight(UnitValue.CreatePercentValue(100));
                 tbFooter.SetMargins(6, 1, 0, 6);
 
-                document.Add(tbFooter);
+                document.Add(tbFooter);*/
+                addNewPage = true;
             }
 
             pdf.Close();
