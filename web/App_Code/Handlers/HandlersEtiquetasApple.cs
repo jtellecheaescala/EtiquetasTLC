@@ -33,7 +33,6 @@ public class HandlersEtiquetasApple
     private PdfWriter writer;
     private PdfDocument pdf;
     private Document document;
-    private ImageData logo;
     private string size;
     private string format;
     private string etiqueta;
@@ -94,29 +93,31 @@ public class HandlersEtiquetasApple
     public Archivo GenerarPDFBultosDHLViajesApple(EtiquetaBultoViajeDHLApple etiqueta, out string message)
     {
         message = null;
+        iText.Layout.Element.Image codigoQR = null;
+        ImageData logo = null;
+
         try
         {
             try
             {
                 log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando logo para etiqueta VIAJES_DHL_APPLE para viaje: " + etiqueta.Nro_Viaje);
-
                 logo = ImageDataFactory.Create(gvalues.PathLogo);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar logo para etiqueta VIAJES_DHL_APPLE para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + e.Message);
+                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar logo para etiqueta VIAJES_DHL_APPLE para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + ex.Message);
+                throw ex;
             }
-           
-            ImageData codigoBarras = null;
-
+ 
             try
             {
-                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo de barra para etiqueta VIAJES_DHL_APPLE para viaje: " + etiqueta.Nro_Viaje);
-                codigoBarras = new ImageHelper().CrearCodigoBarras(etiqueta.Nro_Viaje);
+                log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo QR para etiqueta VIAJES_DHL_APPLE para viaje: " + etiqueta.Nro_Viaje);
+                codigoQR = new ImageHelper().CrearCodigoQRIText(etiqueta.Nro_Viaje, 330, 330);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar codigo de barra para etiqueta VIAJES_DHL_APPLE para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + e.Message);
+                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar codigo de barra para etiqueta VIAJES_DHL_APPLE para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + ex.Message);
+                throw ex;
             }
 
 
@@ -153,11 +154,9 @@ public class HandlersEtiquetasApple
 
             document.Add(tbBody);
 
+    
 
-           // var codigoQR = new ImageHelper().CrearCodigoQRIText(etiqueta.Nro_Viaje);
-
-            //Cell celdaCodigoBarras = (new Cell().Add(codigoQR.SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
-            Cell celdaCodigoBarras = (new Cell().Add(new iText.Layout.Element.Image(codigoBarras).SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
+            Cell celdaCodigoBarras = (new Cell().Add(codigoQR.SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
             Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
             tbFooter.AddCell(new Cell()
                 .Add(new Paragraph("Fecha ruteo: " + "01-01-2024").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMargins(15, 0, 0, 2))
@@ -184,7 +183,6 @@ public class HandlersEtiquetasApple
         }
         catch (Exception ex)
         {
-            // TODO-JUANISi falla, el endpoint responde que se genero todo OK. C
             log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF VIAJES_DHL_APPLE" + ex.Message.ToString());
 
             throw ex;
@@ -265,11 +263,11 @@ public class HandlersEtiquetasApple
 
             return archivoPdf;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF BULTOS_DHL_APPLE" + e.Message.ToString());
+            log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF BULTOS_DHL_APPLE" + ex.Message);
 
-            throw e;
+            throw ex;
         }
         finally
         {

@@ -63,12 +63,12 @@ public class ImageHelper
 
 
 
-    public Image CrearCodigoQR(string codigo)
+    public Image CrearCodigoQR(string codigo, int width, int height)
     {
         System.Drawing.Image QRcode = null;
 
         BarcodeWriter bcWriter = new BarcodeWriter();
-        EncodingOptions encodingQr = new EncodingOptions() { Width = 330, Height = 330, Margin = 1 };
+        EncodingOptions encodingQr = new EncodingOptions() { Width = width, Height = height, Margin = 1 };
         bcWriter.Options = encodingQr;
         bcWriter.Format = BarcodeFormat.QR_CODE;
         QRcode = new Bitmap(bcWriter.Write(codigo));
@@ -76,9 +76,9 @@ public class ImageHelper
         return QRcode;
     }
 
-    public iText.Layout.Element.Image CrearCodigoQRIText(string codigo)
+    public iText.Layout.Element.Image CrearCodigoQRIText(string codigo,int width, int height)
     {
-        var codigoQR = CrearCodigoQR(codigo);
+        var codigoQR = CrearCodigoQR(codigo, width,height);
 
         ImageData imagen = ImageDataFactory.Create(ImageToByteArray(codigoQR));
 
@@ -91,7 +91,7 @@ public class ImageHelper
     {
         using (var ms = new MemoryStream())
         {
-            image.Save(ms, image.RawFormat);
+            image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
             return ms.ToArray();
         }
     }
