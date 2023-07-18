@@ -125,13 +125,6 @@ public class HandlersEtiquetasApple
 
             log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas VIAJES_DHL_APPLE para Viaje: " + etiqueta.Nro_Viaje + " - Tamaño: " + size + " - Formato: " + format);
 
-            //iText.Kernel.Geom.Rectangle rect = //new iText.Kernel.Geom.Rectangle(0, 0, 425, 567);//425 x 566,66
-            /*var pdfCanvas = new PdfCanvas(
-            pdfCanvas.SetFillColor(ColorConstants.YELLOW);
-            pdfCanvas.Rectangle(x, y, width, height);
-            pdfCanvas.Fill();
-             PdfContentByte cb = writer.get*/
-
             float xDisplacement = 14;
             float yDisplacement = 402;
             Border border = new SolidBorder(ColorConstants.BLACK, 1);
@@ -220,7 +213,7 @@ public class HandlersEtiquetasApple
 
 
 
-            Cell celdaCodigoBarras = (new Cell().Add(codigoQR.SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
+            /*Cell celdaCodigoBarras = (new Cell().Add(codigoQR.SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
             Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
             tbFooter.AddCell(new Cell()
                 .Add(new Paragraph("Fecha ruteo: " + "01-01-2024").SetFontSize(11).SetTextAlignment(TextAlignment.LEFT).SetBold().SetMargins(15, 0, 0, 2))
@@ -230,7 +223,7 @@ public class HandlersEtiquetasApple
             tbFooter.SetWidth(UnitValue.CreatePercentValue(100));
             tbFooter.SetMargins(4, 2, 0, 2);
 
-            //document.Add(tbFooter);
+            document.Add(tbFooter);*/
 
             pdf.Close();
 
