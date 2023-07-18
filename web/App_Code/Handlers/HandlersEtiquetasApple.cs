@@ -69,8 +69,8 @@ public class HandlersEtiquetasApple
                 pageSize = PageSize.A4;
             }
             else
-            { 
-              // new PageSize(170, 85):  representa: a 60 mm x 30 mm
+            {
+                // new PageSize(170, 85):  representa: a 60 mm x 30 mm
                 pageSize = new PageSize(170, 85);
             }
 
@@ -107,9 +107,9 @@ public class HandlersEtiquetasApple
             catch (Exception ex)
             {
                 log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar logo para etiqueta VIAJES_DHL_APPLE para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + ex.Message);
-                throw ex;
+                throw new Exception("No se pudo generar el logo para la etiqueta");
             }
- 
+
             try
             {
                 log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando codigo QR para etiqueta VIAJES_DHL_APPLE para viaje: " + etiqueta.Nro_Viaje);
@@ -131,12 +131,12 @@ public class HandlersEtiquetasApple
             Table tMainBorder = new Table(1).SetFixedPosition(xDisplacement, yDisplacement, 567);
             tMainBorder.AddCell(new Cell().SetHeight(425).SetWidth(567).SetBorder(new SolidBorder(ColorConstants.RED, 1)));
             document.Add(tMainBorder);
-            
+
             var p1 = new Paragraph("RUTAS").SetFixedPosition(xDisplacement+15,yDisplacement+378, 370)
                 .SetFontSize(24).SetBorder(border).SetTextAlignment(TextAlignment.CENTER);
 
             var imgLogo = new iText.Layout.Element.Image(logo).SetPadding(0).SetWidth(150).SetFixedPosition(xDisplacement + 402, yDisplacement + 370);
-            
+
             document.Add(p1);
             document.Add(imgLogo);
 
@@ -167,10 +167,10 @@ public class HandlersEtiquetasApple
             document.Add(p6);
             document.Add(p7);
 
-            var p8 = new Paragraph("Fecha ruteo: " + "01-01-2024").SetFixedPosition(xDisplacement + 15, yDisplacement + 93, 370)
+            var p8 = new Paragraph("Fecha ruteo: " + etiqueta.Fecha_Ruteo.ToString("dd-MM-yyyy")).SetFixedPosition(xDisplacement + 15, yDisplacement + 93, 370)
                 .SetFontSize(20).SetTextAlignment(TextAlignment.LEFT).SetBorder(border).SetPaddingLeft(8);
-            
-            var p9 = new Paragraph("Fecha estimada salida: " + "01-01-2024").SetFixedPosition(xDisplacement + 15, yDisplacement + 53, 370)
+
+            var p9 = new Paragraph("Fecha estimada salida: " + etiqueta.Fecha_Estimada_Salida.ToString("dd-MM-yyyy")).SetFixedPosition(xDisplacement + 15, yDisplacement + 53, 370)
                 .SetFontSize(20).SetTextAlignment(TextAlignment.LEFT).SetBorder(border).SetPaddingLeft(8);
 
             var imgQR = codigoQR.SetPadding(0).SetWidth(135).SetFixedPosition(xDisplacement + 410, yDisplacement + 3);
@@ -180,6 +180,8 @@ public class HandlersEtiquetasApple
             document.Add(imgQR);
 
             pdf.Close();
+            writer.Close();
+            document.Close();
 
             string fileName = System.IO.Path.GetFileName(ruta);
 
@@ -198,13 +200,7 @@ public class HandlersEtiquetasApple
 
             throw ex;
         }
-        finally
-        {
-            document.Close();
-            writer.Close();
-            pdf.Close();
-        }
-
+        
     }
 
     public Archivo GenerarPDFBultosDHLApple(List<EtiquetaBultoDHLApple> etiquetas)
@@ -229,7 +225,7 @@ public class HandlersEtiquetasApple
                     .SetFixedPosition(5, 40, 80).SetFontSize(22).SetBold();
                 var p4 = new Paragraph(string.Format("{0}/{1}", etiqueta.Parada.PadLeft(2, '0'), etiqueta.CantParadasTotales.PadLeft(2, '0')))
                     .SetFixedPosition(80, 20, 95).SetFontSize(34).SetBold();
-                
+
                 document.Add(p3);
                 document.Add(p4);
 
@@ -247,6 +243,8 @@ public class HandlersEtiquetasApple
             }
 
             pdf.Close();
+            document.Close();
+            writer.Close();
 
             string fileName = System.IO.Path.GetFileName(ruta);
 
@@ -264,12 +262,6 @@ public class HandlersEtiquetasApple
             log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "ERROR", "ERROR CREANDO ARCHIVO PDF BULTOS_DHL_APPLE" + ex.Message);
 
             throw ex;
-        }
-        finally
-        {
-            document.Close();
-            writer.Close();
-            pdf.Close();
         }
     }
 

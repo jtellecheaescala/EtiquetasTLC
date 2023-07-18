@@ -894,7 +894,6 @@ public class WSEtiquetas : WebService
                 Directory.CreateDirectory(gvalues.PathOut);
             }
 
-
             ImageData logo = ImageDataFactory.Create(gvalues.PathLogo);
 
 

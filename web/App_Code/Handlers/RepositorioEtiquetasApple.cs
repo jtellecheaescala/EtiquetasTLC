@@ -33,7 +33,7 @@ public class RepositorioEtiquetasApple
                             new SqlParameter {ParameterName = "@NroViaje", SqlDbType = SqlDbType.Int, Value = int.Parse(nroViaje)},
                             new SqlParameter {ParameterName = "@NroOperacion", SqlDbType = SqlDbType.Int, Value = int.Parse(nroOperacion)},
                             new SqlParameter {ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)},
-                            new SqlParameter {ParameterName = "@IdPallet", SqlDbType = SqlDbType.Int, Value =  String.IsNullOrEmpty(idPallet) ? DBNull.Value : (object) idPallet}
+                            new SqlParameter {ParameterName = "@IdPallet", SqlDbType = SqlDbType.VarChar, Value =  String.IsNullOrEmpty(idPallet) ? DBNull.Value : (object) idPallet}
                         }
         }.ExecuteReader())
         {
@@ -96,8 +96,8 @@ public class RepositorioEtiquetasApple
                     etiqueta.Nro_Viaje = StringHelper.LimpiarCampo(readerData["Nro_Viaje"]);
                     etiqueta.Cantidad_Ordenes = StringHelper.LimpiarCampo(readerData["CantOrdenes"]);
                     etiqueta.Cantidad_Bultos = StringHelper.LimpiarCampo(readerData["CantBultos"]);
-                    etiqueta.Fecha_Ruteo = StringHelper.LimpiarCampo(readerData["FechaRuteo"]);
-                    etiqueta.Fecha_Estimada_Salida = StringHelper.LimpiarCampo(readerData["FechaEstimadaSalida"]);
+                    etiqueta.Fecha_Ruteo = Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["FechaRuteo"]));
+                    etiqueta.Fecha_Estimada_Salida = Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["FechaEstimadaSalida"]));
 
                     // TODO: Sacarestos mensajes de aca. Dejar la responsablidad a WSEtiquetas.
                     message = String.Format("Se encontro bultos una etiqueta para VIAJES_DHL_Apple para los datos: Viaje: {0}, Nro Operacion {1}", nroViaje, nroOperacion);
