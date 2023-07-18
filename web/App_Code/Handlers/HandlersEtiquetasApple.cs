@@ -1,10 +1,13 @@
 ﻿using iText.IO.Image;
+using iText.Kernel.Colors;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Borders;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+//using iTextSharp.text;
+//using iTextSharp.text.pdf;
 using Models;
 using System;
 using System.Collections.Generic;
@@ -14,8 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using Tecnologistica;
-using ZXing;
-using ZXing.Common;
+
 
 /// <summary>
 /// Summary description for HandlersEtiquetasApple
@@ -116,14 +118,76 @@ public class HandlersEtiquetasApple
             }
             catch (Exception ex)
             {
-                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar codigo de barra para etiqueta VIAJES_DHL_APPLE para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + ex.Message);
+                log.GrabarLogs(connLog, severidades.MsgSoporte1, "ERROR", "No se pudo generar codigo de QR para etiqueta VIAJES_DHL_APPLE para el viaje: " + etiqueta.Nro_Viaje + ". Detalles: " + ex.Message);
                 throw ex;
             }
 
 
             log.GrabarLogs(connLog, severidades.NovedadesEjecucion, "Notificacion", "Generando etiquetas VIAJES_DHL_APPLE para Viaje: " + etiqueta.Nro_Viaje + " - Tamaño: " + size + " - Formato: " + format);
 
-            Table tbHeader = new Table(UnitValue.CreatePercentArray(new float[] { 60, 20 }));
+            //iText.Kernel.Geom.Rectangle rect = //new iText.Kernel.Geom.Rectangle(0, 0, 425, 567);//425 x 566,66
+            /*var pdfCanvas = new PdfCanvas(
+            pdfCanvas.SetFillColor(ColorConstants.YELLOW);
+            pdfCanvas.Rectangle(x, y, width, height);
+            pdfCanvas.Fill();
+             PdfContentByte cb = writer.get*/
+
+            float xDisplacement = 14;
+            float yDisplacement = 402;
+            Border border = new SolidBorder(ColorConstants.BLACK, 1);
+
+            Table tMainBorder = new Table(1).SetFixedPosition(xDisplacement, yDisplacement, 567);
+            tMainBorder.AddCell(new Cell().SetHeight(425).SetWidth(567).SetBorder(new SolidBorder(ColorConstants.RED, 1)));
+            document.Add(tMainBorder);
+            
+            var p1 = new Paragraph("RUTAS").SetFixedPosition(xDisplacement+15,yDisplacement+378, 370)
+                .SetFontSize(24).SetBorder(border).SetTextAlignment(TextAlignment.CENTER);
+
+            var imgLogo = new iText.Layout.Element.Image(logo).SetPadding(0).SetWidth(150).SetFixedPosition(xDisplacement + 402, yDisplacement + 370);
+            
+            document.Add(p1);
+            document.Add(imgLogo);
+
+            var p2 = new Paragraph("Número de Viaje:").SetFixedPosition(xDisplacement + 15, yDisplacement + 304, 520)
+                .SetFontSize(28).SetTextAlignment(TextAlignment.LEFT).SetBorder(border).SetPaddings(12, 8, 12, 8);
+
+            var p3 = new Paragraph(etiqueta.Nro_Viaje).SetFixedPosition(xDisplacement + 283, yDisplacement + 300.5f, 255)
+                .SetFontSize(34).SetBold().SetTextAlignment(TextAlignment.CENTER).SetBorder(border);
+
+            document.Add(p2);
+            document.Add(p3);
+
+            var p4 = new Paragraph("# Bultos:").SetFixedPosition(xDisplacement + 15, yDisplacement + 227, 520)
+                .SetFontSize(24).SetTextAlignment(TextAlignment.LEFT).SetBorder(border).SetPaddings(12, 8, 12, 8);
+
+            var p5 = new Paragraph(etiqueta.Cantidad_Bultos).SetFixedPosition(xDisplacement + 223, yDisplacement + 219.5f, 315)
+                .SetFontSize(34).SetBold().SetTextAlignment(TextAlignment.CENTER).SetBorder(border);
+
+            document.Add(p4);
+            document.Add(p5);
+
+            var p6 = new Paragraph("# Ordenes:").SetFixedPosition(xDisplacement + 15, yDisplacement + 152, 520)
+                .SetFontSize(24).SetTextAlignment(TextAlignment.LEFT).SetBorder(border).SetPaddings(12, 8, 12, 8);
+
+            var p7 = new Paragraph(etiqueta.Cantidad_Ordenes).SetFixedPosition(xDisplacement + 223, yDisplacement + 144.5f, 315)
+                .SetFontSize(34).SetBold().SetTextAlignment(TextAlignment.CENTER).SetBorder(border);
+
+            document.Add(p6);
+            document.Add(p7);
+
+            var p8 = new Paragraph("Fecha ruteo: " + "01-01-2024").SetFixedPosition(xDisplacement + 15, yDisplacement + 93, 370)
+                .SetFontSize(20).SetTextAlignment(TextAlignment.LEFT).SetBorder(border).SetPaddingLeft(8);
+            
+            var p9 = new Paragraph("Fecha estimada salida: " + "01-01-2024").SetFixedPosition(xDisplacement + 15, yDisplacement + 53, 370)
+                .SetFontSize(20).SetTextAlignment(TextAlignment.LEFT).SetBorder(border).SetPaddingLeft(8);
+
+            var imgQR = codigoQR.SetPadding(0).SetWidth(135).SetFixedPosition(xDisplacement + 410, yDisplacement + 3);
+
+            document.Add(p8);
+            document.Add(p9);
+            document.Add(imgQR);
+
+            /*Table tbHeader = new Table(UnitValue.CreatePercentArray(new float[] { 60, 20 }));
 
             tbHeader.AddCell(new Cell().Add(new Paragraph(String.Empty).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER).SetBold().SetMinHeight(15).SetMaxHeight(15).SetMaxWidth(160))
                                               .Add(new Paragraph("Rutas").SetMultipliedLeading(1).SetFontSize(10).SetTextAlignment(TextAlignment.LEFT).SetMinHeight(12).SetMaxHeight(12).SetMaxWidth(160)).SetBorder(Border.NO_BORDER))
@@ -136,10 +200,10 @@ public class HandlersEtiquetasApple
             tbHeader.SetHeight(UnitValue.CreatePercentValue(40));
             tbHeader.SetMargins(6, 2, 0, 2);
 
-            document.Add(tbHeader);
+            document.Add(tbHeader);*/
 
 
-            Table tbBody = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
+            /*Table tbBody = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
             tbBody.AddCell(new Cell().Add(new Paragraph("Numero de Viaje:").SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()));
             tbBody.AddCell(new Cell().Add(new Paragraph(etiqueta.Nro_Viaje).SetFontSize(13).SetTextAlignment(TextAlignment.CENTER).SetBold()));
 
@@ -152,9 +216,9 @@ public class HandlersEtiquetasApple
             tbBody.SetWidth(UnitValue.CreatePercentValue(100));
             tbBody.SetMargins(0, 2, 0, 2);
 
-            document.Add(tbBody);
+            document.Add(tbBody);*/
 
-    
+
 
             Cell celdaCodigoBarras = (new Cell().Add(codigoQR.SetAutoScale(true).SetMargins(4, 0, 0, 0).SetHorizontalAlignment(HorizontalAlignment.CENTER)));
             Table tbFooter = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }));
@@ -166,7 +230,7 @@ public class HandlersEtiquetasApple
             tbFooter.SetWidth(UnitValue.CreatePercentValue(100));
             tbFooter.SetMargins(4, 2, 0, 2);
 
-            document.Add(tbFooter);
+            //document.Add(tbFooter);
 
             pdf.Close();
 
