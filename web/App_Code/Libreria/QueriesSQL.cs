@@ -220,7 +220,7 @@ namespace Tecnologistica
                                                     JOIN Datos_del_Viaje DV WITH (NOLOCK)
                                                     	ON DV.Nro_Viaje = VI.Nro_Viaje
                                                     		AND VI.Nro_Operacion = DV.Nro_Operacion
-                                                    JOIN Remitos_Bultos RB WITH (NOLOCK)
+                                                    LEFT JOIN Remitos_Bultos RB WITH (NOLOCK)
                                                     	ON RE.ID_Remito = RB.ID_Remito
                                                     WHERE VI.Nro_Viaje = @NroViaje
                                                     	AND VI.Nro_Operacion = @NroOperacion
