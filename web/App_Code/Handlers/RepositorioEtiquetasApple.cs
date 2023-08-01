@@ -21,8 +21,9 @@ public class RepositorioEtiquetasApple
         message = String.Empty;
         int etiquetasCount = 0;
 
+        string remitos = String.Join(",", sIDRemito.Split('|'));
 
-        using (SqlDataReader readerData = new SqlCommand
+        using (var cmd = new SqlCommand()
         {
             Connection = connDB,
             CommandType = CommandType.Text,
@@ -32,11 +33,13 @@ public class RepositorioEtiquetasApple
                         {
                             new SqlParameter {ParameterName = "@NroViaje", SqlDbType = SqlDbType.Int, Value = int.Parse(nroViaje)},
                             new SqlParameter {ParameterName = "@NroOperacion", SqlDbType = SqlDbType.Int, Value = int.Parse(nroOperacion)},
-                            new SqlParameter {ParameterName = "@IdRemito", SqlDbType = SqlDbType.Int, Value = int.Parse(sIDRemito)},
+                            new SqlParameter {ParameterName = "@IdsRemitos", SqlDbType = SqlDbType.VarChar, Value = sIDRemito},
                             new SqlParameter {ParameterName = "@IdPallet", SqlDbType = SqlDbType.VarChar, Value =  String.IsNullOrEmpty(idPallet) ? DBNull.Value : (object) idPallet}
                         }
-        }.ExecuteReader())
+        })
         {
+            SqlDataReader readerData = cmd.ExecuteReader();
+
             if (readerData.HasRows)
             {
                 while (readerData.Read())
@@ -61,58 +64,60 @@ public class RepositorioEtiquetasApple
             }
             else
             {
-                message = String.Format("No se encontraron datos para las etiquetas BultosDHLApple para los datos Viaje: {0}, Nro Operacion {1}, Id Remito {2}, IdPallet: {3}", nroViaje, nroOperacion, sIDRemito, idPallet);
+                message = String.Format("No se encontraron datos para las etiquetas BultosDHLApple para los datos Viaje: {0}, Nro Operacion {1}, Id Remito {2}, IdPallet: {3}", nroViaje, nroOperacion, sIDRemito, idPallet ?? "-");
             }
         }
         return lstEtiquetas;
     }
 
-    public EtiquetaBultoViajeDHLApple ObtenerDatosEtiquetasViajesBultosDHLApple(SqlConnection connDB, Log log, SqlConnection connLog, Globals.staticValues.SeveridadesClass severidades, int timeOutQueries, string nroOperacion, string nroViaje, out string message)
-    {
-        try
-        {
-            string cantidadTotal = string.Empty;
-            message = String.Empty;
-            EtiquetaBultoViajeDHLApple etiqueta = null;
 
-            using (SqlDataReader readerData = new SqlCommand
-            {
-                Connection = connDB,
-                CommandType = CommandType.Text,
-                CommandTimeout = timeOutQueries,
-                CommandText = queriesSQL.viajesDHLApple,
-                Parameters =
+
+public EtiquetaBultoViajeDHLApple ObtenerDatosEtiquetasViajesBultosDHLApple(SqlConnection connDB, Log log, SqlConnection connLog, Globals.staticValues.SeveridadesClass severidades, int timeOutQueries, string nroOperacion, string nroViaje, out string message)
+{
+    try
+    {
+        string cantidadTotal = string.Empty;
+        message = String.Empty;
+        EtiquetaBultoViajeDHLApple etiqueta = null;
+
+        using (SqlDataReader readerData = new SqlCommand
+        {
+            Connection = connDB,
+            CommandType = CommandType.Text,
+            CommandTimeout = timeOutQueries,
+            CommandText = queriesSQL.viajesDHLApple,
+            Parameters =
                         {
                             new SqlParameter {ParameterName = "@NroViaje", SqlDbType = SqlDbType.Int, Value = int.Parse(nroViaje)},
                             new SqlParameter {ParameterName = "@NroOperacion", SqlDbType = SqlDbType.Int, Value = int.Parse(nroOperacion)},
                         }
-            }.ExecuteReader())
-            {
-                if (readerData.Read())
-                {
-
-                    etiqueta = new EtiquetaBultoViajeDHLApple();
-      
-                    etiqueta.Nro_Viaje = StringHelper.LimpiarCampo(readerData["Nro_Viaje"]);
-                    etiqueta.Cantidad_Ordenes = StringHelper.LimpiarCampo(readerData["CantOrdenes"]);
-                    etiqueta.Cantidad_Bultos = StringHelper.LimpiarCampo(readerData["CantBultos"]);
-                    etiqueta.Fecha_Ruteo = Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["FechaRuteo"]));
-                    etiqueta.Fecha_Estimada_Salida = Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["FechaEstimadaSalida"]));
-
-                    // TODO: Sacarestos mensajes de aca. Dejar la responsablidad a WSEtiquetas.
-                    message = String.Format("Se encontro bultos una etiqueta para VIAJES_DHL_Apple para los datos: Viaje: {0}, Nro Operacion {1}", nroViaje, nroOperacion);
-                }
-                else
-                {
-                    message = String.Format("No se encontraron bultos para las etiquetas VIAJES_DHL_Apple para los datos: Viaje: {0}, Nro Operacion {1}", nroViaje, nroOperacion);
-                }
-            }
-            return etiqueta;
-        }
-        catch (Exception ex)
+        }.ExecuteReader())
         {
-            message = String.Format("Se produjo un error al obtener datos para etiquetas  VIAJES_DHL_Apple para los datos: Viaje: {0}, Nro Operacion {1}. Error: {2}", nroViaje, nroOperacion, ex.Message);
-            throw ex;
+            if (readerData.Read())
+            {
+
+                etiqueta = new EtiquetaBultoViajeDHLApple();
+
+                etiqueta.Nro_Viaje = StringHelper.LimpiarCampo(readerData["Nro_Viaje"]);
+                etiqueta.Cantidad_Ordenes = StringHelper.LimpiarCampo(readerData["CantOrdenes"]);
+                etiqueta.Cantidad_Bultos = StringHelper.LimpiarCampo(readerData["CantBultos"]);
+                etiqueta.Fecha_Ruteo = Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["FechaRuteo"]));
+                etiqueta.Fecha_Estimada_Salida = Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["FechaEstimadaSalida"]));
+
+                // TODO: Sacarestos mensajes de aca. Dejar la responsablidad a WSEtiquetas.
+                message = String.Format("Se encontro bultos una etiqueta para VIAJES_DHL_Apple para los datos: Viaje: {0}, Nro Operacion {1}", nroViaje, nroOperacion);
+            }
+            else
+            {
+                message = String.Format("No se encontraron bultos para las etiquetas VIAJES_DHL_Apple para los datos: Viaje: {0}, Nro Operacion {1}", nroViaje, nroOperacion);
+            }
         }
+        return etiqueta;
     }
+    catch (Exception ex)
+    {
+        message = String.Format("Se produjo un error al obtener datos para etiquetas  VIAJES_DHL_Apple para los datos: Viaje: {0}, Nro Operacion {1}. Error: {2}", nroViaje, nroOperacion, ex.Message);
+        throw ex;
+    }
+}
 }

@@ -171,7 +171,7 @@ namespace Tecnologistica
                                             				          PA.Orden_Entrega AS 'Parada'
                                             			          , GR.CantParadasTotales AS 'CantParadasTotales'
                                             			          , DV.Fecha_Hora_Ruteo AS 'FechaViaje'
-                                            			          , [dbo].[FN_NRO_INTENTO_REMITO]( @IdRemito, @NroOperacion, @NroViaje ) AS 'NroReintento'
+                                            			          , [dbo].[FN_NRO_INTENTO_REMITO](RE.ID_Remito, VI.Nro_Operacion, VI.Nro_Viaje) AS 'NroReintento'
                                                           FROM Remitos RE WITH (NOLOCK)
                                                           JOIN Remitos_Viaje RV WITH (NOLOCK)
                                                           	       ON RV.ID_Remito = RE.ID_Remito
@@ -201,7 +201,7 @@ namespace Tecnologistica
 
                                                           WHERE VI.Nro_Viaje = @NroViaje
                                                           	AND VI.Nro_Operacion = @NroOperacion
-                                                          	AND RE.ID_Remito = @IdRemito
+                                                          	AND RE.ID_Remito IN (@IdsRemitos)
                                                             AND (@IdPallet IS NULL OR rb.ID_Pallet = @IdPallet)";
 
         internal readonly string viajesDHLApple = @"

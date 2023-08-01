@@ -66,7 +66,7 @@ namespace Tecnologistica
             public string PathLogo = ConfigurationManager.AppSettings["PathLogo"];
             public string PathLogoChico = ConfigurationManager.AppSettings["PathLogoChico"];
 
-            public string version = "4.0.0.6";
+            public string version = "5.0.0.0";
 
             public class SeveridadesClass
             {

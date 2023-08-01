@@ -107,12 +107,12 @@ public class WSEtiquetas : WebService
             }
 
             //Validaciones para el template BultosXD
-            if(template.ToUpper() == TEMPLATE_BULTOSXD)
+            if (template.ToUpper() == TEMPLATE_BULTOSXD)
             {
                 #region Generacion de mensaje de error
                 string msgError = null;
 
-                if(format.ToUpper() != "PDF")
+                if (format.ToUpper() != "PDF")
                 {
                     msgError += "El template BultosXD solo admite el formato 'PDF'";
                 }
@@ -141,7 +141,7 @@ public class WSEtiquetas : WebService
                 }
                 #endregion
 
-                if(msgError != null)
+                if (msgError != null)
                 {
                     log.GrabarLogs(connLog, severidades.MsgUsuarios1, "ERROR", "El Modo de grabación debe ser URL o BASE64");
 
@@ -171,6 +171,24 @@ public class WSEtiquetas : WebService
                 {
                     msgError += "Debe indicarse el campo IdREmito";
                 }
+                else
+                {
+                    var lstIdRemitos = IDRemito.Split('|').ToList();
+
+                    if (lstIdRemitos.Count() > 1)
+                    {
+
+                        if (!String.IsNullOrEmpty(idPallet)) msgError += "No es posible indicar IdPallet para multiples remitos.";
+                        else
+                        {
+                            int remitoInt;
+                            foreach (var remito in lstIdRemitos)
+                            {
+                                if (!Int32.TryParse(remito, out remitoInt)) msgError += String.Format("Formato de remito indicado no valido: {0}", String.IsNullOrEmpty(remito) ? "Vacio" : remito);
+                            }
+                        }
+                    }
+                }
 
                 if (format.ToUpper() != "PDF")
                 {
@@ -180,8 +198,6 @@ public class WSEtiquetas : WebService
                 {
                     msgError += "El template solo admite tamaño Zebra";
                 }
-         
-    
                 if (separarPorDocumento != 0 && separarPorDocumento != 1)
                 {
                     if (msgError == null)
@@ -206,7 +222,8 @@ public class WSEtiquetas : WebService
                     response.message = msgError;
                     return response;
                 }
-            }else if (template.ToUpper() == TEMPLATE_VIAJES_DHL_Apple)
+            }
+            else if (template.ToUpper() == TEMPLATE_VIAJES_DHL_Apple)
             {
                 #region Generacion de mensaje de error
                 string msgError = null;
@@ -635,7 +652,7 @@ public class WSEtiquetas : WebService
                     response.Archivos.Add(archivo);
                     return response;
                 }
-                else if(string.Equals(template.ToUpper(), TEMPLATE_BULTOSXD))
+                else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOSXD))
                 {
                     var archivo = GenerarPDFBultosXD(remitos, size.ToLower(), format);
                     response.message = "Etiquetas generadas con exito";
@@ -643,13 +660,13 @@ public class WSEtiquetas : WebService
                 }
                 else if (string.Equals(template.ToUpper(), TEMPLATE_BULTOS_DHL_APPLE))
                 {
-                    var archivo = new HandlersEtiquetasApple(log, connLog, severidades, MODO_OBTENCION_ARCHIVO, gvalues, size, TEMPLATE_BULTOS_DHL_APPLE,format).GenerarPDFBultosDHLApple(etiquedasBultosDHL);
-        
+                    var archivo = new HandlersEtiquetasApple(log, connLog, severidades, MODO_OBTENCION_ARCHIVO, gvalues, size, TEMPLATE_BULTOS_DHL_APPLE, format).GenerarPDFBultosDHLApple(etiquedasBultosDHL);
+
                     response.Archivos.Add(archivo);
                 }
                 else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
-                { 
-                    var archivo = new HandlersEtiquetasApple(log,connLog,severidades,MODO_OBTENCION_ARCHIVO,gvalues,size, TEMPLATE_VIAJES_DHL_Apple, format).GenerarPDFBultosDHLViajesApple(etiquetaBultoViajeDHLApple, out response.message);
+                {
+                    var archivo = new HandlersEtiquetasApple(log, connLog, severidades, MODO_OBTENCION_ARCHIVO, gvalues, size, TEMPLATE_VIAJES_DHL_Apple, format).GenerarPDFBultosDHLViajesApple(etiquetaBultoViajeDHLApple, out response.message);
                     if (archivo != null) response.Archivos.Add(archivo);
                     else return response;
                 }
@@ -714,13 +731,13 @@ public class WSEtiquetas : WebService
                     }
                     else if (string.Equals(template.ToUpper(), TEMPLATE_VIAJES_DHL_Apple))
                     {
-                      //  etiquetaBultosXDSeparada.Add(remito);
-                      ////  var archivo = GenerarPDFBultosXD(etiquetaBultosXDSeparada, size.ToLower(), format.ToLower());
+                        //  etiquetaBultosXDSeparada.Add(remito);
+                        ////  var archivo = GenerarPDFBultosXD(etiquetaBultosXDSeparada, size.ToLower(), format.ToLower());
 
-                      //  if (archivo != null)
-                      //  {
-                      //      response.Archivos.Add(archivo);
-                      //  }
+                        //  if (archivo != null)
+                        //  {
+                        //      response.Archivos.Add(archivo);
+                        //  }
                     }
                     else
                     {
@@ -879,7 +896,7 @@ public class WSEtiquetas : WebService
         #endregion
 
 
-        string ruta = gvalues.PathOut + "\\" + DateTime.Now.ToString("yyyyMMdd-hhmmssffff_")+ lEtiquetasVertical.Count() + ".pdf";
+        string ruta = gvalues.PathOut + "\\" + DateTime.Now.ToString("yyyyMMdd-hhmmssffff_") + lEtiquetasVertical.Count() + ".pdf";
         PdfWriter writer = new PdfWriter(ruta);
         PdfDocument pdf = new PdfDocument(writer);
 
@@ -1026,7 +1043,8 @@ public class WSEtiquetas : WebService
                     {
                         celdaBultos = (new Cell().Add(new Paragraph(countBulto + " de " + lEtiquetasVertical.Where(x => x.IdRemito == etq.IdRemito).Count()).SetFontSize(9).SetTextAlignment(TextAlignment.LEFT)));
                     }
-                    else if(Convert.ToDouble(etq.Bulto) == 0) {
+                    else if (Convert.ToDouble(etq.Bulto) == 0)
+                    {
                         celdaBultos = (new Cell().Add(new Paragraph("").SetFontSize(9).SetTextAlignment(TextAlignment.LEFT)));
                     }
                     else
@@ -1110,7 +1128,7 @@ public class WSEtiquetas : WebService
 
             return archivoPdf;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             //Esto lo llamo a que si falla en algo la generacion del pdf libero los recursos de este pdf, porque sino queda siempre pegado y el programa nunca lo cierra hasta que se cae.
             writer.Close();
@@ -1236,7 +1254,7 @@ public class WSEtiquetas : WebService
 
                     int fontSizeBultos = 70;
                     var vAlignBultos = VerticalAlignment.TOP;
-                    if(r.bultosXD.Bultos.Length >= 4)
+                    if (r.bultosXD.Bultos.Length >= 4)
                     {
                         fontSizeBultos = 60;
                         vAlignBultos = VerticalAlignment.MIDDLE;
