@@ -201,7 +201,7 @@ namespace Tecnologistica
 
                                                           WHERE VI.Nro_Viaje = @NroViaje
                                                           	AND VI.Nro_Operacion = @NroOperacion
-                                                          	AND RE.ID_Remito IN (@IdsRemitos)
+                                                          	AND RE.ID_Remito = @IdRemito
                                                             AND (@IdPallet IS NULL OR rb.ID_Pallet = @IdPallet)";
 
         internal readonly string viajesDHLApple = @"
