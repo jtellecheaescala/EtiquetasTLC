@@ -207,7 +207,7 @@ namespace Tecnologistica
         internal readonly string viajesDHLApple = @"
                                                     SELECT VI.Nro_Operacion AS 'Nro_Operacion'
                                                     	 , VI.Nro_Viaje AS 'Nro_Viaje'
-                                                    	 , COUNT( DISTINCT RB.ID_Pallet ) AS 'CantBultos'
+                                                    	 , COUNT( DISTINCT CONVERT(VARCHAR(20),RV.ID_Remito) + RB.ID_Pallet) AS 'CantBultos'
                                                     	 , COUNT( DISTINCT RV.ID_Remito ) AS 'CantOrdenes'
                                                     	 , MAX( DV.Fecha_Hora_Ruteo ) AS 'FechaRuteo'
                                                     	 , COALESCE( MAX( VI.Fecha_Hora_Salida ), MAX( DV.Fecha_Hora_Presentacion ) ) AS 'FechaEstimadaSalida'
