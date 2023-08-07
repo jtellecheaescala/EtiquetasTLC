@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using Tecnologistica;
@@ -44,6 +45,7 @@ public class RepositorioEtiquetasApple
 
                 if (readerData.HasRows)
                 {
+                    DateTime fecha;
                     while (readerData.Read())
                     {
                         etiquetasCount++;
@@ -58,7 +60,7 @@ public class RepositorioEtiquetasApple
                         etiqueta.ParcelId = StringHelper.LimpiarCampo(readerData["ParcelId"]);
                         etiqueta.Parada = StringHelper.LimpiarCampo(readerData["Parada"]);
                         etiqueta.CantParadasTotales = StringHelper.LimpiarCampo(readerData["CantParadasTotales"]);
-                        etiqueta.FechaViaje = StringHelper.LimpiarCampo(readerData["FechaViaje"]);
+                        etiqueta.FechaViaje = readerData["FechaViaje"] == null ? "" : Convert.ToDateTime(StringHelper.LimpiarCampo(readerData["FechaViaje"])).ToString("dd/MM/yyyy HH:mm");
                         etiqueta.NroReintento = StringHelper.LimpiarCampo(readerData["NroReintento"]);
 
                         lstEtiquetas.Add(etiqueta);

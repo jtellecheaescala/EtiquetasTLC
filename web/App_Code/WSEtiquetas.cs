@@ -213,7 +213,7 @@ public class WSEtiquetas : WebService
 
                 if (msgError != null)
                 {
-                    log.GrabarLogs(connLog, severidades.MsgUsuarios1, "ERROR", "El Modo de grabación debe ser URL o BASE64");
+                    log.GrabarLogs(connLog, severidades.MsgUsuarios1, "ERROR", msgError);
 
                     sendMail.SendMailLogs();
 
@@ -261,7 +261,7 @@ public class WSEtiquetas : WebService
 
                 if (msgError != null)
                 {
-                    log.GrabarLogs(connLog, severidades.MsgUsuarios1, "ERROR", "El Modo de grabación debe ser URL o BASE64");
+                    log.GrabarLogs(connLog, severidades.MsgUsuarios1, "ERROR", msgError);
 
                     sendMail.SendMailLogs();
 
