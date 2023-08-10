@@ -216,15 +216,15 @@ public class HandlersEtiquetasApple
                     document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
 
                 var p1 = new Paragraph("Viaje:").SetFixedPosition(5, 70, 85).SetFontSize(10).SetBold();
-                var p2 = new Paragraph("Parada:").SetFixedPosition(80, 70, 90).SetFontSize(10).SetBold();
+                var p2 = new Paragraph("Parada:").SetFixedPosition(110, 70, 90).SetFontSize(10).SetBold();
 
                 document.Add(p1);
                 document.Add(p2);
 
                 var p3 = new Paragraph(etiqueta.Nro_Viaje.PadLeft(6, '0'))
                     .SetFixedPosition(5, 40, 80).SetFontSize(22).SetBold();
-                var p4 = new Paragraph(string.Format("{0}/{1}", etiqueta.Parada.PadLeft(2, '0'), etiqueta.CantParadasTotales.PadLeft(2, '0')))
-                    .SetFixedPosition(80, 20, 95).SetFontSize(34).SetBold();
+                var p4 = new Paragraph(string.Format("{0}", etiqueta.Parada.PadLeft(2, '0'), etiqueta.CantParadasTotales.PadLeft(2, '0')))
+                    .SetFixedPosition(110, 20, 95).SetFontSize(34).SetBold();
 
                 document.Add(p3);
                 document.Add(p4);
